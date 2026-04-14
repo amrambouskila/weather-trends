@@ -1,13 +1,14 @@
+import json
 import time
-import requests
-import pandas as pd
+
 import matplotlib.pyplot as plt
 import numpy as np
-import json
+import pandas as pd
+import requests
 
 
 class GlobalWeatherAnalyzer:
-    def __init__(self):
+    def __init__(self) -> None:
         self.base_url = "https://archive-api.open-meteo.com/v1/archive"
 
         # Define representative locations across the globe for better coverage
@@ -28,7 +29,13 @@ class GlobalWeatherAnalyzer:
 
         self.raw_data = None
         
-    def fetch_weather_data(self, lat, lon, start_date, end_date):
+    def fetch_weather_data(
+        self,
+        lat: float,
+        lon: float,
+        start_date: str,
+        end_date: str,
+    ) -> dict | str | None:
         """Fetch weather data from Open-Meteo API for a specific location"""
         params = {
             "latitude": lat,
@@ -47,7 +54,11 @@ class GlobalWeatherAnalyzer:
             print(f"Status Code: {response.status_code}")
             
             if response.status_code != 200:
-                if "Hourly API request limit exceeded" in response.text or "Daily API request limit exceeded" in response.text:
+                text = response.text
+                if (
+                    "Hourly API request limit exceeded" in text
+                    or "Daily API request limit exceeded" in text
+                ):
                     return 'limit exceeded'
 
                 print(f"Response content: {response.text}")
@@ -67,7 +78,7 @@ class GlobalWeatherAnalyzer:
         except json.JSONDecodeError:
             return None
 
-    def collect_global_data(self):
+    def collect_global_data(self) -> pd.DataFrame | None:
         """Collect weather data from all representative locations"""
         start_date = '1940-01-01'
         end_date = '2025-12-31'
@@ -107,17 +118,17 @@ class GlobalWeatherAnalyzer:
 
     def mock_weather_data(
             self,
-            locations,
-            start_date="1990-01-01",
-            end_date="2025-12-31",
-            freq="D",
-            trend_c_per_year=0.02,  # warming signal
-            residual_loc_std=0.8,  # small location-specific bias (after lat model)
-            daily_noise_std=1.2,  # day-to-day variability
-            ar1_phi=0.75,  # autocorrelation (weather persistence)
-            missing_rate=0.0,
-            seed=42,
-    ):
+            locations: list[dict],
+            start_date: str = "1990-01-01",
+            end_date: str = "2025-12-31",
+            freq: str = "D",
+            trend_c_per_year: float = 0.02,  # warming signal
+            residual_loc_std: float = 0.8,  # small location-specific bias (after lat model)
+            daily_noise_std: float = 1.2,  # day-to-day variability
+            ar1_phi: float = 0.75,  # autocorrelation (weather persistence)
+            missing_rate: float = 0.0,
+            seed: int = 42,
+    ) -> pd.DataFrame:
         """
         Returns a DataFrame compatible with visualize_weather_data():
           columns: time, temperature_2m_mean, location, lat, lon
@@ -195,7 +206,7 @@ class GlobalWeatherAnalyzer:
 
         return out
 
-    def visualize_weather_data(self, df):
+    def visualize_weather_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Calculate yearly averages for temperature and humidity"""
         # Convert date column to datetime
         df['time'] = pd.to_datetime(df['time'])
@@ -323,7 +334,7 @@ class GlobalWeatherAnalyzer:
 
         return yearly_avg
         
-    def generate_summary_report(self, yearly_avg):
+    def generate_summary_report(self, yearly_avg: pd.DataFrame) -> None:
         """Generate a summary report of the findings"""
         print("=" * 60)
         print("GLOBAL WEATHER ANALYSIS SUMMARY REPORT")
@@ -334,7 +345,7 @@ class GlobalWeatherAnalyzer:
         
         temp_stats = yearly_avg['temperature_2m_mean'].describe()
         
-        print(f"TEMPERATURE STATISTICS:")
+        print("TEMPERATURE STATISTICS:")
         print(f"Mean: {temp_stats['mean']:.2f}°C")
         print(f"Min: {temp_stats['min']:.2f}°C ({yearly_avg.loc[yearly_avg['temperature_2m_mean'].idxmin()]})")
         print(f"Max: {temp_stats['max']:.2f}°C ({yearly_avg.loc[yearly_avg['temperature_2m_mean'].idxmax()]})")
@@ -343,7 +354,7 @@ class GlobalWeatherAnalyzer:
         # Calculate trends
         temp_trend = np.polyfit(yearly_avg.index, yearly_avg['temperature_2m_mean'], 1)[0]
         
-        print(f"TRENDS:")
+        print("TRENDS:")
         print(f"Temperature Trend: {temp_trend:.4f}°C per year")
         
         # Calculate decade averages
@@ -352,13 +363,13 @@ class GlobalWeatherAnalyzer:
             'temperature_2m_mean': 'mean',
         }).reset_index()
         
-        print(f"DECADE AVERAGES:")
+        print("DECADE AVERAGES:")
         for _, row in decade_avg.iterrows():
             print(f"{int(row['decade'])}s: {row['temperature_2m_mean']:.2f}°C")
         
         print("=" * 60)
 
-    def run_analysis(self):
+    def run_analysis(self) -> None:
         """Run the complete weather analysis"""
         try:
             # Collect data
