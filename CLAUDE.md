@@ -34,7 +34,7 @@ This is a **global weather trend analyzer** — a data-driven climate analysis t
 ## 1. Project Identity
 
 - **Name:** weather-trends
-- **Location:** `/Users/amrambouskila/IMPORTANT/Projects/weather-trends/`
+- **Location:** `weather-trends/`
 - **Master plan:** `docs/WEATHER_TRENDS_MASTER_PLAN.md`
 - **Purpose:** Fetch, aggregate, and visualize global temperature trends from 1940-2025 using the Open-Meteo Archive API.
 - **Stack:** Python 3.13, pandas, numpy, scipy, matplotlib, seaborn, httpx
