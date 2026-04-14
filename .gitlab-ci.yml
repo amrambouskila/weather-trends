@@ -1,0 +1,113 @@
+# ============================================================
+# Weather Trends Analyzer — GitLab CI/CD Pipeline
+# ============================================================
+# Branch Strategy:
+#   dev      → active development
+#   staging  → pre-production validation
+#   main     → production-ready, tagged with semver
+#
+#   Merge flow: feature-branch → dev → staging → main
+# ============================================================
+spec:
+  inputs:
+    bump:
+      description: 'Semver bump type: patch, minor, or major. Leave empty to skip release.'
+      default: ''
+      options:
+        - ''
+        - 'patch'
+        - 'minor'
+        - 'major'
+---
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: '$CI_COMMIT_MESSAGE =~ /^release: v.*/'
+      when: never
+    - when: always
+
+stages:
+  - lint
+  - test
+  - build
+  - docker
+
+# ============================================================
+# Shared config: Python 3.13 with uv
+# ============================================================
+.python-setup:
+  image: python:3.13-slim
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .venv/
+  before_script:
+    - pip install uv
+    - uv sync
+
+# ============================================================
+# Stage 1: Lint
+# ============================================================
+lint:
+  stage: lint
+  extends: .python-setup
+  script:
+    - uv run ruff check .
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^(dev|staging|main)$/
+    - if: $CI_COMMIT_BRANCH =~ /^(dev|staging|main)$/
+
+# ============================================================
+# Stage 2: Tests + Coverage (100% gate)
+# Coverage threshold enforced via pytest-cov --cov-fail-under.
+# If coverage drops below 100%, this job fails and build is blocked.
+# ============================================================
+test:
+  stage: test
+  extends: .python-setup
+  script:
+    - uv run pytest --cov=src --cov-report=term-missing --cov-fail-under=100 --junitxml=junit.xml -q
+  needs: [lint]
+  coverage: '/TOTAL.*\s(\d+)%/'
+  artifacts:
+    when: always
+    reports:
+      junit: junit.xml
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^(dev|staging|main)$/
+    - if: $CI_COMMIT_BRANCH =~ /^(dev|staging|main)$/
+
+# ============================================================
+# Stage 3: Build
+# Gated on test passing with 100% coverage.
+# ============================================================
+build:
+  stage: build
+  extends: .python-setup
+  script:
+    - uv build
+  needs: [test]
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 hour
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^(dev|staging|main)$/
+    - if: $CI_COMMIT_BRANCH =~ /^(dev|staging|main)$/
+
+# ============================================================
+# Stage 4: Docker Build
+# Verifies the Dockerfile builds successfully.
+# ============================================================
+docker:
+  stage: docker
+  image: docker:24
+  services:
+    - docker:24-dind
+  needs: [build]
+  script:
+    - docker build -t weather-trends:${CI_COMMIT_SHORT_SHA} .
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^(staging|main)$/

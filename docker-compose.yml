@@ -1,0 +1,8 @@
+services:
+  weather-trends:
+    build: .
+    restart: "no"
+    volumes:
+      - ./output:/app/output
+    environment:
+      - OUTPUT_DIR=/app/output
