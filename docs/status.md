@@ -1,11 +1,15 @@
 # Status — Weather Trends Analyzer
 
 **Phase:** 1 — CLI Script
-**Last updated:** 2026-04-13
+**Last updated:** 2026-04-16
 
 ## Current State
 
-Project infrastructure scaffolded. The original single-file prototype (`weather_trend.py`, ~380 lines) exists and runs. It contains a `GlobalWeatherAnalyzer` class with methods for fetching data from Open-Meteo, generating mock data, computing anomalies + trends, and producing matplotlib charts.
+Refactor underway: `src/` now holds `config.py`, `fetcher.py`, `mock_data.py`, and `src/models/` (Location, DailyTemperatureRecord, YearlyAnomaly, TrendResult). 42 tests pass at 100% coverage. `analyzer.py`, `visualizer.py`, and `cli.py` remain to be extracted from `weather_trend.py`.
+
+Most recent change: fixed a seasonal-phase bug in `MockDataGenerator` where the sine-based seasonal curve peaked in April (not July) and was non-orthogonal to `frac_year`, biasing recovered linear trends.
+
+The original single-file prototype (`weather_trend.py`, ~380 lines) still exists as a reference and will be removed after the refactor is complete.
 
 Infrastructure files created:
 - `CLAUDE.md`, `README.md`, `docs/WEATHER_TRENDS_MASTER_PLAN.md`

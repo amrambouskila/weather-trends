@@ -11,7 +11,6 @@ BASE_TEMP_EQUATOR_C: float = 28.0
 BASE_TEMP_LAT_FACTOR: float = 0.45
 SEASONAL_AMP_BASE_C: float = 3.0
 SEASONAL_AMP_LAT_FACTOR: float = 0.22
-SOUTHERN_HEMISPHERE_PHASE_SHIFT_DAYS: int = 182
 DAYS_PER_YEAR: float = 365.25
 MISSING_DROP_SCALE: float = 0.15
 
@@ -56,8 +55,11 @@ class MockDataGenerator:
             lat_abs = abs(loc.lat)
             base_mean = BASE_TEMP_EQUATOR_C - BASE_TEMP_LAT_FACTOR * lat_abs
             amp = SEASONAL_AMP_BASE_C + SEASONAL_AMP_LAT_FACTOR * lat_abs
-            phase_shift = SOUTHERN_HEMISPHERE_PHASE_SHIFT_DAYS if loc.lat < 0 else 0
-            seasonal = amp * np.sin(2 * np.pi * ((doy + phase_shift) / DAYS_PER_YEAR))
+            # Cosine form peaks mid-year in the northern hemisphere (early July) and
+            # six months later in the southern, and is orthogonal to frac_year so a
+            # linear regression recovers the planted trend without seasonal bias.
+            hemisphere_sign = -1.0 if loc.lat < 0 else 1.0
+            seasonal = -hemisphere_sign * amp * np.cos(2 * np.pi * doy / DAYS_PER_YEAR)
 
             ar = _ar1_noise(rng, n, self._ar1_phi, self._daily_noise_std)
             loc_residual = rng.normal(0.0, self._residual_loc_std)
