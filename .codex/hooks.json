@@ -1,0 +1,48 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "EDITED_FILE=\"$TOOL_INPUT_FILE_PATH\" && case \"$EDITED_FILE\" in *.env*|*credentials*|*secrets*|*.pem|*.key|*.p12) echo '{\"decision\":\"block\",\"reason\":\"Sensitive file detected. Confirm with user before writing to environment/credential files.\"}' ;; *) ;; esac",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "EDITED_FILE=\"$TOOL_INPUT_FILE_PATH\" && case \"$EDITED_FILE\" in */src/analyzer*|*/src/fetcher*|*/src/mock_data*) echo 'DOMAIN CODE EDITED: '\"$EDITED_FILE\" && echo '' && echo 'Verify:' && echo '  1. Full type annotations on all functions' && echo '  2. No hard-coded locations, URLs, or dates \u2014 use config.py' && echo '  3. Numerical code uses explicit numpy dtypes' && echo '  4. Corresponding test file updated in tests/' && echo '  5. No bare except clauses' ;; */src/visualizer*) echo 'VISUALIZER EDITED: '\"$EDITED_FILE\" && echo '' && echo 'Verify:' && echo '  1. seaborn + matplotlib only \u2014 no plotly' && echo '  2. Charts save to output/ as PNG (300 DPI)' && echo '  3. No plt.show() in non-interactive mode' && echo '  4. Axis labels include units' ;; */src/config*) echo 'CONFIG EDITED: '\"$EDITED_FILE\" && echo '' && echo 'Verify:' && echo '  1. Location data uses Pydantic models' && echo '  2. All values are configurable (env vars or constants)' && echo '  3. No domain logic in config \u2014 data only' ;; *) ;; esac",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '=== SESSION END CHECK ===' && CHANGED=$(git diff --name-only 2>/dev/null) && STAGED=$(git diff --cached --name-only 2>/dev/null) && if [ -n \"$CHANGED\" ] || [ -n \"$STAGED\" ]; then echo 'UNCOMMITTED CHANGES DETECTED:' && echo \"$CHANGED\" && echo \"$STAGED\" && echo '' && DOCS_TOUCHED=false && echo \"$CHANGED $STAGED\" | grep -q 'docs/' && DOCS_TOUCHED=true; if [ \"$DOCS_TOUCHED\" = false ]; then echo 'WARNING: Files changed but docs/ not updated.' && echo 'Consider updating: status.md, versions.md'; fi; else echo 'No uncommitted changes.'; fi",
+            "timeout": 10000
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"systemMessage\":\"SESSION END \u2014 MEMORY REVIEW: Before this session closes, review what was learned and suggest memories the user may want to save. Check ~/.codex/memories/-Users-amrambouskila-IMPORTANT-Projects-weather-trends/memory/MEMORY.md first to avoid duplicates. Memory types: user (role, preferences), feedback (corrections, confirmed approaches \u2014 include WHY), project (decisions with external motivation), reference (pointers to external systems). Worth saving: corrections the user gave you, non-obvious approaches they confirmed, project decisions driven by external factors. NOT worth saving: anything derivable from code or git history, ephemeral task details, things already in AGENTS.md. Present a short bulleted list of suggested memories at the end of your response.\"}'",
+            "timeout": 10000
+          }
+        ]
+      }
+    ]
+  }
+}
