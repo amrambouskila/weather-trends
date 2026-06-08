@@ -2,6 +2,8 @@
 
 ---
 
+<mandatory_workflow>
+
 > **MANDATORY WORKFLOW: READ THIS ENTIRE FILE BEFORE EVERY CHANGE.** Every time. No skimming, no assuming prior-session context carries over — it does not.
 >
 > **Why:** This project spans multiple sessions and months of development. Skipping the re-read produces decisions that contradict the architecture, duplicate existing patterns, break data contracts, or introduce tech debt that compounds.
@@ -14,7 +16,11 @@
 > 5. Read the source files you plan to modify — understand existing patterns first.
 > 6. Then implement, following the rules and contracts defined here.
 
+</mandatory_workflow>
+
 ---
+
+<critical_context>
 
 ## 0. Critical Context
 
@@ -29,7 +35,11 @@ This is a **global weather trend analyzer** — a data-driven climate analysis t
 
 **Current phase:** Phase 1 — CLI script. Single-file prototype (`weather_trend.py`) exists and works. Needs refactoring into proper project structure with type annotations, tests, Docker, and CI/CD.
 
+</critical_context>
+
 ---
+
+<project_identity>
 
 ## 1. Project Identity
 
@@ -40,7 +50,11 @@ This is a **global weather trend analyzer** — a data-driven climate analysis t
 - **Stack:** Python 3.13, pandas, numpy, scipy, matplotlib, seaborn, httpx
 - **Data source:** Open-Meteo Archive API (`https://archive-api.open-meteo.com/v1/archive`)
 
+</project_identity>
+
 ---
+
+<phase_constraints>
 
 ## 2. Phase Constraints
 
@@ -62,7 +76,11 @@ This is a **global weather trend analyzer** — a data-driven climate analysis t
 - REST API for querying stored data.
 - Frontend visualization via React (if needed beyond Streamlit).
 
+</phase_constraints>
+
 ---
+
+<architecture>
 
 ## 3. Architecture & Code Rules
 
@@ -92,7 +110,11 @@ This is a **global weather trend analyzer** — a data-driven climate analysis t
 - No bare `except:` clauses. Catch specific exception types.
 - API rate limits: retry with backoff, log the event, never recurse infinitely.
 
+</architecture>
+
 ---
+
+<data_contracts>
 
 ## 4. Domain Model & Data Contracts
 
@@ -137,7 +159,11 @@ class TrendResult(BaseModel):
     slope_unit: str = "degC/year"
 ```
 
+</data_contracts>
+
 ---
+
+<file_structure>
 
 ## 5. Module Structure (Target)
 
@@ -164,7 +190,11 @@ weather-trends/
 └── ...
 ```
 
+</file_structure>
+
 ---
+
+<testing>
 
 ## 6. Testing Requirements
 
@@ -179,7 +209,11 @@ weather-trends/
 - **Mock the API.** httpx responses are mocked in fetcher tests. Use `pytest-httpx` or manual mocking.
 - **Parametrize:** Use `@pytest.mark.parametrize` for multiple cities, date ranges, edge cases.
 
+</testing>
+
 ---
+
+<containerization>
 
 ## 7. Containerization
 
@@ -193,7 +227,11 @@ weather-trends/
 - **Phase 2:** Becomes a long-running Streamlit service. Add healthcheck, port exposure.
 - **Phase 3:** Adds PostgreSQL + Redis. Full `depends_on` with healthchecks.
 
+</containerization>
+
 ---
+
+<ci_cd>
 
 ## 8. CI/CD — GitLab
 
@@ -206,7 +244,11 @@ weather-trends/
 4. **build** — `uv build` — must complete without errors.
 5. **docker-build** — `docker build .` — verify Dockerfile builds.
 
+</ci_cd>
+
 ---
+
+<visualization_standards>
 
 ## 9. Visualization Standards
 
@@ -220,7 +262,11 @@ weather-trends/
 - **Output:** Save to `output/` directory as PNG (300 DPI). Never `plt.show()` in non-interactive mode.
 - **Figure sizing:** `figsize` in inches, consistent across charts. Axis labels with units.
 
+</visualization_standards>
+
 ---
+
+<git_policy>
 
 ## 10. Hands Off Git
 
@@ -231,7 +277,11 @@ When you finish a task, report:
 2. Whether the change group is cohesive enough to be one commit or should be split.
 3. A suggested commit message (subject + body), clearly labeled as a suggestion.
 
+</git_policy>
+
 ---
+
+<environment>
 
 ## 11. Environment Configuration
 
@@ -241,7 +291,11 @@ WEATHER_TRENDS_PORT=8501        # Phase 2: Streamlit port
 OUTPUT_DIR=./output             # Where charts are saved
 ```
 
+</environment>
+
 ---
+
+<change_policy>
 
 ## 12. Change Policy & Local Documentation
 
@@ -255,7 +309,11 @@ When completing a feature or significant change, update:
    - Only ONE unreleased version at a time above `pyproject.toml`'s version.
    - Do NOT modify `pyproject.toml`'s version field directly — release pipeline handles it.
 
+</change_policy>
+
 ---
+
+<definition_of_done>
 
 ## 13. Output & Completion Expectations
 
@@ -272,8 +330,14 @@ At the end of every non-trivial task, run through this checklist:
 9. **Forward-compatibility check** — Changes align with Phase 2/3 plans.
 10. **Git state** — Report changed files and suggest a commit message.
 
+</definition_of_done>
+
 ---
+
+<closing_reminder>
 
 ## 14. Reminder
 
 Re-read this file before the next change. Every session, every time.
+
+</closing_reminder>

@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>weather-trends — Project Documentation</title>
+  <style>
+/* ============================================================================
+   doc.css — Shared design system for project documentation pages.
+   One source of truth for every project's PROJECT_DOCUMENTATION.html.
+   Inlined directly into this PROJECT_DOCUMENTATION.html (self-contained; no external stylesheet).
+   Do not fork per-project styles. Restyle here to restyle every project at once.
+   ============================================================================ */
+
+/* ---- Theme tokens ------------------------------------------------------- */
+:root {
+  --accent: #4f46e5;
+  --accent-soft: #eef2ff;
+  --accent-border: #c7d2fe;
+  --accent-text: #4338ca;
+
+  --bg: #ffffff;
+  --bg-alt: #f7f8fa;
+  --panel: #ffffff;
+  --panel-alt: #f3f4f6;
+  --border: #e5e7eb;
+  --border-strong: #d1d5db;
+  --text: #1f2937;
+  --text-soft: #374151;
+  --muted: #6b7280;
+
+  --code-bg: #f6f8fa;
+  --code-text: #1f2937;
+  --code-border: #e5e7eb;
+
+  --fileref-bg: #eef2ff;
+  --fileref-text: #3730a3;
+  --fileref-border: #c7d2fe;
+
+  --note-bg: #eff6ff;   --note-border: #3b82f6;   --note-text: #1e40af;
+  --tip-bg: #ecfdf5;    --tip-border: #10b981;    --tip-text: #065f46;
+  --warn-bg: #fffbeb;   --warn-border: #f59e0b;   --warn-text: #92400e;
+  --key-bg: #faf5ff;    --key-border: #a855f7;    --key-text: #6b21a8;
+  --danger-bg: #fef2f2; --danger-border: #ef4444; --danger-text: #991b1b;
+
+  --shadow: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.10);
+  --shadow-lg: 0 10px 30px rgba(16,24,40,.12);
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --header-h: 64px;
+
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --maxw: 980px;
+}
+
+:root[data-theme="dark"] {
+  --accent: #818cf8;
+  --accent-soft: #1e213a;
+  --accent-border: #3b3f6b;
+  --accent-text: #a5b4fc;
+
+  --bg: #0d1117;
+  --bg-alt: #0a0d12;
+  --panel: #161b22;
+  --panel-alt: #1c2230;
+  --border: #2d333b;
+  --border-strong: #3d444d;
+  --text: #e6edf3;
+  --text-soft: #c9d1d9;
+  --muted: #8b949e;
+
+  --code-bg: #161b22;
+  --code-text: #e6edf3;
+  --code-border: #30363d;
+
+  --fileref-bg: #1e213a;
+  --fileref-text: #c7d2fe;
+  --fileref-border: #3b3f6b;
+
+  --note-bg: #0d2138;   --note-border: #3b82f6;   --note-text: #93c5fd;
+  --tip-bg: #082a1e;    --tip-border: #10b981;    --tip-text: #6ee7b7;
+  --warn-bg: #2b2410;   --warn-border: #f59e0b;   --warn-text: #fcd34d;
+  --key-bg: #221033;    --key-border: #a855f7;    --key-text: #d8b4fe;
+  --danger-bg: #2c1212; --danger-border: #ef4444; --danger-text: #fca5a5;
+
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 1px 3px rgba(0,0,0,.4);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,.5);
+}
+
+/* ---- Base --------------------------------------------------------------- */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg-alt);
+  color: var(--text);
+  line-height: 1.65;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent-text); text-decoration: none; }
+a:hover { text-decoration: underline; }
+h1, h2, h3, h4 { line-height: 1.25; color: var(--text); }
+p { margin: 0 0 1rem; }
+hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+
+/* ---- Scroll progress bar ------------------------------------------------ */
+#scrollProgress {
+  position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+  background: linear-gradient(90deg, var(--accent), #ec4899);
+  z-index: 1000; transition: width .08s linear;
+}
+
+/* ---- Header ------------------------------------------------------------- */
+.doc-header {
+  position: sticky; top: 0; z-index: 900;
+  height: var(--header-h);
+  display: flex; align-items: center; gap: 1rem;
+  padding: 0 1.25rem;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: saturate(140%) blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+.doc-header .brand { display: flex; flex-direction: column; min-width: 0; }
+.doc-header .brand .kicker {
+  font-size: .68rem; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--muted); font-weight: 700;
+}
+.doc-header .brand .title {
+  font-size: 1.05rem; font-weight: 700; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; max-width: 46vw;
+}
+.doc-header .spacer { flex: 1 1 auto; }
+
+.doc-search {
+  position: relative; display: flex; align-items: center;
+}
+.doc-search input {
+  width: 230px; max-width: 36vw;
+  padding: .5rem .75rem .5rem 2rem;
+  border: 1px solid var(--border-strong); border-radius: 999px;
+  background: var(--panel); color: var(--text); font-size: .9rem;
+  outline: none; transition: border-color .15s, box-shadow .15s, width .2s;
+}
+.doc-search input:focus {
+  border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); width: 280px;
+}
+.doc-search::before {
+  content: ""; position: absolute; left: .65rem; width: 14px; height: 14px; opacity: .55;
+  background: currentColor;
+  -webkit-mask: var(--icon-search) center/contain no-repeat;
+          mask: var(--icon-search) center/contain no-repeat;
+  color: var(--muted);
+}
+.search-count {
+  position: absolute; right: .6rem; font-size: .72rem; color: var(--muted);
+  pointer-events: none;
+}
+
+.btn {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .42rem .7rem; font-size: .82rem; font-weight: 600;
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: var(--panel); color: var(--text-soft); cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s; white-space: nowrap;
+}
+.btn:hover { background: var(--panel-alt); border-color: var(--accent); color: var(--accent-text); }
+.btn .ico { width: 15px; height: 15px; background: currentColor;
+  -webkit-mask-size: contain; mask-size: contain;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: center; mask-position: center; }
+.btn-group { display: flex; gap: .4rem; }
+@media (max-width: 760px) { .btn .label { display: none; } .doc-header .title { max-width: 32vw; } }
+
+/* ---- Layout ------------------------------------------------------------- */
+.doc-layout {
+  display: grid; grid-template-columns: 290px minmax(0, 1fr);
+  align-items: start; gap: 0;
+  max-width: 1400px; margin: 0 auto;
+}
+.doc-toc {
+  position: sticky; top: var(--header-h);
+  height: calc(100vh - var(--header-h));
+  overflow-y: auto; padding: 1.25rem .75rem 3rem 1.25rem;
+  border-right: 1px solid var(--border);
+}
+.doc-toc .toc-title {
+  font-size: .7rem; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); font-weight: 700; margin: 0 0 .5rem .5rem;
+}
+.doc-toc ul { list-style: none; margin: 0; padding: 0; }
+.doc-toc li { margin: 0; }
+.doc-toc a {
+  display: block; padding: .32rem .5rem; border-radius: 6px;
+  color: var(--text-soft); font-size: .86rem; line-height: 1.4;
+  border-left: 2px solid transparent;
+}
+.doc-toc a:hover { background: var(--panel-alt); text-decoration: none; }
+.doc-toc a.sub { padding-left: 1.4rem; font-size: .8rem; color: var(--muted); }
+.doc-toc a.active {
+  color: var(--accent-text); background: var(--accent-soft);
+  border-left-color: var(--accent); font-weight: 600;
+}
+.doc-toc .toc-num {
+  display: inline-block; min-width: 1.4em; color: var(--muted);
+  font-variant-numeric: tabular-nums; font-weight: 600;
+}
+.doc-toc a.active .toc-num { color: var(--accent); }
+
+.doc-content { padding: 2rem 2.5rem 6rem; min-width: 0; }
+.doc-content-inner { max-width: var(--maxw); margin: 0 auto; }
+@media (max-width: 980px) {
+  .doc-layout { grid-template-columns: 1fr; }
+  .doc-toc { display: none; }
+  .doc-content { padding: 1.25rem 1rem 4rem; }
+}
+
+/* ---- Hero (page intro) -------------------------------------------------- */
+.doc-hero { margin-bottom: 1.75rem; }
+.doc-hero h1 { font-size: 2.1rem; margin: 0 0 .4rem; letter-spacing: -.02em; }
+.doc-hero .lede { font-size: 1.12rem; color: var(--text-soft); margin: 0 0 1rem; }
+.badge-row { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
+.badge {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .25rem .6rem; border-radius: 999px; font-size: .76rem; font-weight: 600;
+  background: var(--panel-alt); color: var(--text-soft); border: 1px solid var(--border);
+}
+.badge.accent { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent-border); }
+.badge.green  { background: var(--tip-bg); color: var(--tip-text); border-color: var(--tip-border); }
+.badge.amber  { background: var(--warn-bg); color: var(--warn-text); border-color: var(--warn-border); }
+.badge.purple { background: var(--key-bg); color: var(--key-text); border-color: var(--key-border); }
+
+.meta-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: .75rem; margin: 1rem 0 0;
+}
+.meta-grid .meta-item {
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: .7rem .85rem;
+}
+.meta-grid .meta-k {
+  font-size: .68rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); font-weight: 700; margin-bottom: .15rem;
+}
+.meta-grid .meta-v { font-size: .92rem; font-weight: 600; color: var(--text); }
+
+/* ---- Sections (collapsible top level) ----------------------------------- */
+.doc-section { scroll-margin-top: calc(var(--header-h) + 12px); margin-bottom: 1.1rem; }
+.doc-section > details {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden;
+}
+.doc-section > details[open] { box-shadow: var(--shadow-lg); }
+.doc-section > details > summary {
+  list-style: none; cursor: pointer; user-select: none;
+  display: flex; align-items: center; gap: .75rem;
+  padding: 1rem 1.25rem; font-weight: 700;
+}
+.doc-section > details > summary::-webkit-details-marker { display: none; }
+.doc-section > details > summary:hover { background: var(--panel-alt); }
+.doc-section > details > summary h2 {
+  font-size: 1.2rem; margin: 0; font-weight: 700; flex: 1 1 auto;
+}
+.doc-section .sec-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 1.9rem; height: 1.9rem; border-radius: 8px;
+  background: var(--accent-soft); color: var(--accent-text);
+  font-size: .85rem; font-weight: 800; font-variant-numeric: tabular-nums;
+}
+.doc-section .chevron {
+  width: 18px; height: 18px; color: var(--muted); transition: transform .2s; flex: 0 0 auto;
+  background: currentColor;
+  -webkit-mask: var(--icon-chevron) center/contain no-repeat;
+          mask: var(--icon-chevron) center/contain no-repeat;
+}
+.doc-section > details[open] > summary .chevron { transform: rotate(90deg); }
+.sec-body { padding: .25rem 1.5rem 1.5rem; border-top: 1px solid var(--border); }
+.sec-body > :first-child { margin-top: 1rem; }
+
+/* sub-collapsibles inside a section (per-component drilldowns) */
+details.sub {
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg-alt); margin: .85rem 0; overflow: hidden;
+}
+details.sub > summary {
+  list-style: none; cursor: pointer; padding: .7rem 1rem; font-weight: 600;
+  display: flex; align-items: center; gap: .55rem; font-size: .96rem;
+}
+details.sub > summary::-webkit-details-marker { display: none; }
+details.sub > summary:hover { background: var(--panel-alt); }
+details.sub > summary::before {
+  content: ""; width: 14px; height: 14px; color: var(--muted); transition: transform .2s; flex: 0 0 auto;
+  background: currentColor;
+  -webkit-mask: var(--icon-chevron) center/contain no-repeat;
+          mask: var(--icon-chevron) center/contain no-repeat;
+}
+details.sub[open] > summary::before { transform: rotate(90deg); }
+details.sub > summary .sub-tag {
+  margin-left: auto; font-family: var(--mono); font-size: .72rem; font-weight: 600;
+  color: var(--muted); background: var(--panel-alt); border: 1px solid var(--border);
+  padding: .1rem .45rem; border-radius: 6px;
+}
+.sub-body { padding: .25rem 1rem 1rem; }
+.sub-body > :first-child { margin-top: .65rem; }
+
+/* ---- File references ---------------------------------------------------- */
+code.fileref {
+  font-family: var(--mono); font-size: .82em; font-weight: 600;
+  background: var(--fileref-bg); color: var(--fileref-text);
+  border: 1px solid var(--fileref-border); border-radius: 6px;
+  padding: .08em .45em .08em 1.5em; cursor: pointer; position: relative;
+  white-space: nowrap; transition: filter .12s;
+}
+code.fileref::before {
+  content: ""; position: absolute; left: .4em; top: 50%; transform: translateY(-50%);
+  width: .85em; height: .85em; background: currentColor; opacity: .8;
+  -webkit-mask: var(--icon-file) center/contain no-repeat;
+          mask: var(--icon-file) center/contain no-repeat;
+}
+code.fileref:hover { filter: brightness(.96); text-decoration: none; }
+:root[data-theme="dark"] code.fileref:hover { filter: brightness(1.15); }
+code.fileref.copied { background: var(--tip-bg); color: var(--tip-text); border-color: var(--tip-border); }
+code.fileref.dir::before { -webkit-mask: var(--icon-folder) center/contain no-repeat; mask: var(--icon-folder) center/contain no-repeat; }
+
+.filecard {
+  display: flex; align-items: baseline; gap: .65rem; flex-wrap: wrap;
+  padding: .55rem .7rem; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg-alt); margin: .4rem 0;
+}
+.filecard .filecard-desc { color: var(--text-soft); font-size: .92rem; }
+.filelist { display: flex; flex-direction: column; gap: .35rem; margin: .75rem 0; }
+
+/* ---- Inline code & code blocks ------------------------------------------ */
+:not(pre) > code {
+  font-family: var(--mono); font-size: .86em;
+  background: var(--panel-alt); border: 1px solid var(--border);
+  border-radius: 5px; padding: .08em .4em; color: var(--code-text);
+}
+figure.code {
+  margin: 1rem 0; border: 1px solid var(--code-border); border-radius: var(--radius-sm);
+  overflow: hidden; background: var(--code-bg);
+}
+figure.code figcaption {
+  display: flex; align-items: center; gap: .5rem;
+  padding: .5rem .85rem; font-family: var(--mono); font-size: .76rem; font-weight: 600;
+  color: var(--muted); background: var(--panel-alt); border-bottom: 1px solid var(--code-border);
+}
+figure.code figcaption .lang {
+  margin-left: auto; text-transform: uppercase; letter-spacing: .06em; font-size: .68rem;
+}
+figure.code pre { margin: 0; padding: .9rem 1rem; overflow-x: auto; }
+figure.code code { font-family: var(--mono); font-size: .82rem; line-height: 1.6; color: var(--code-text); background: none; border: none; padding: 0; }
+.code-copy {
+  position: absolute; top: .4rem; right: .4rem; opacity: 0; transition: opacity .15s;
+}
+figure.code { position: relative; }
+figure.code:hover .code-copy { opacity: 1; }
+
+/* ---- Callouts ----------------------------------------------------------- */
+.callout {
+  display: grid; grid-template-columns: auto 1fr; gap: .25rem .75rem;
+  padding: .85rem 1rem; border-radius: var(--radius-sm); margin: 1rem 0;
+  border: 1px solid; border-left-width: 4px;
+}
+.callout .callout-title { font-weight: 700; font-size: .9rem; grid-column: 2; }
+.callout .callout-body { grid-column: 2; }
+.callout .callout-body > :last-child { margin-bottom: 0; }
+.callout::before {
+  content: ""; grid-row: 1 / span 2; width: 18px; height: 18px; margin-top: .15rem;
+  background: currentColor;
+  -webkit-mask-size: contain; mask-size: contain;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+}
+.callout.note  { background: var(--note-bg); border-color: var(--note-border); color: var(--note-text); }
+.callout.tip   { background: var(--tip-bg);  border-color: var(--tip-border);  color: var(--tip-text); }
+.callout.warn  { background: var(--warn-bg); border-color: var(--warn-border); color: var(--warn-text); }
+.callout.key   { background: var(--key-bg);  border-color: var(--key-border);  color: var(--key-text); }
+.callout.danger{ background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger-text); }
+.callout.note::before  { -webkit-mask: var(--icon-info) center/contain no-repeat; mask: var(--icon-info) center/contain no-repeat; }
+.callout.tip::before   { -webkit-mask: var(--icon-bulb) center/contain no-repeat; mask: var(--icon-bulb) center/contain no-repeat; }
+.callout.warn::before  { -webkit-mask: var(--icon-warn) center/contain no-repeat; mask: var(--icon-warn) center/contain no-repeat; }
+.callout.key::before   { -webkit-mask: var(--icon-key) center/contain no-repeat; mask: var(--icon-key) center/contain no-repeat; }
+.callout.danger::before{ -webkit-mask: var(--icon-warn) center/contain no-repeat; mask: var(--icon-warn) center/contain no-repeat; }
+.callout .callout-body code { background: color-mix(in srgb, currentColor 12%, transparent); border-color: transparent; color: inherit; }
+
+/* ---- Tables ------------------------------------------------------------- */
+.table-wrap { overflow-x: auto; margin: 1rem 0; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+table.doc-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+table.doc-table th, table.doc-table td { padding: .6rem .8rem; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+table.doc-table thead th { background: var(--panel-alt); font-weight: 700; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); position: sticky; top: 0; }
+table.doc-table tbody tr:last-child td { border-bottom: none; }
+table.doc-table tbody tr:hover { background: var(--bg-alt); }
+table.doc-table code { white-space: nowrap; }
+
+/* ---- Definition lists --------------------------------------------------- */
+dl.doc-dl { margin: 1rem 0; display: grid; grid-template-columns: minmax(140px, 220px) 1fr; gap: .1rem 1rem; }
+dl.doc-dl dt { font-weight: 700; color: var(--text); padding: .4rem 0; border-top: 1px solid var(--border); }
+dl.doc-dl dd { margin: 0; padding: .4rem 0; color: var(--text-soft); border-top: 1px solid var(--border); }
+dl.doc-dl dt:first-of-type, dl.doc-dl dd:first-of-type { border-top: none; }
+@media (max-width: 620px) { dl.doc-dl { grid-template-columns: 1fr; } dl.doc-dl dd { padding-top: 0; border-top: none; } }
+
+/* ---- Tech-stack cards --------------------------------------------------- */
+.stack-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: .85rem; margin: 1rem 0; }
+.stack-card {
+  border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-alt);
+  padding: .85rem .95rem; display: flex; flex-direction: column; gap: .35rem;
+}
+.stack-card .stack-head { display: flex; align-items: baseline; gap: .5rem; }
+.stack-card .stack-name { font-weight: 700; font-size: 1rem; }
+.stack-card .stack-ver { font-family: var(--mono); font-size: .76rem; color: var(--accent-text); background: var(--accent-soft); border: 1px solid var(--accent-border); border-radius: 5px; padding: .05rem .4rem; }
+.stack-card .stack-why { font-size: .87rem; color: var(--text-soft); }
+.stack-card .stack-foot { margin-top: auto; }
+
+/* ---- Step list ---------------------------------------------------------- */
+ol.steps { counter-reset: step; list-style: none; padding: 0; margin: 1rem 0; }
+ol.steps > li {
+  position: relative; padding: .15rem 0 .9rem 2.4rem; margin: 0;
+  border-left: 2px solid var(--border); margin-left: .9rem;
+}
+ol.steps > li:last-child { border-left-color: transparent; }
+ol.steps > li::before {
+  counter-increment: step; content: counter(step);
+  position: absolute; left: -.95rem; top: 0;
+  width: 1.8rem; height: 1.8rem; border-radius: 50%;
+  background: var(--accent); color: #fff; font-weight: 700; font-size: .85rem;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ---- Pipeline / flow chips ---------------------------------------------- */
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; margin: 1rem 0; }
+.flow .node { padding: .35rem .7rem; border: 1px solid var(--accent-border); background: var(--accent-soft); color: var(--accent-text); border-radius: var(--radius-sm); font-weight: 600; font-size: .85rem; }
+.flow .arrow { color: var(--muted); font-weight: 700; }
+
+/* ---- Diagram (mermaid) -------------------------------------------------- */
+figure.diagram { margin: 1.25rem 0; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--panel); padding: 1rem; overflow-x: auto; text-align: center; }
+figure.diagram figcaption { margin-top: .6rem; font-size: .82rem; color: var(--muted); text-align: center; }
+figure.diagram .mermaid { display: flex; justify-content: center; }
+.mermaid-fallback { display: none; }
+figure.diagram.failed .mermaid { display: none; }
+figure.diagram.failed .mermaid-fallback { display: block; text-align: left; }
+
+/* ---- Misc --------------------------------------------------------------- */
+.tag-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: .5rem 0; }
+.tag { font-size: .76rem; padding: .15rem .5rem; border-radius: 999px; background: var(--panel-alt); border: 1px solid var(--border); color: var(--text-soft); font-family: var(--mono); }
+
+.lead-in { font-size: 1rem; color: var(--text-soft); border-left: 3px solid var(--accent); padding-left: .9rem; margin: 0 0 1.25rem; }
+
+ul.clean { list-style: none; padding-left: 0; }
+ul.clean > li { position: relative; padding-left: 1.4rem; margin: .35rem 0; }
+ul.clean > li::before { content: ""; position: absolute; left: .2rem; top: .55em; width: .4rem; height: .4rem; border-radius: 50%; background: var(--accent); }
+
+.content-section h3 { margin-top: 1.5rem; font-size: 1.05rem; }
+.sec-body h3 { margin-top: 1.6rem; font-size: 1.08rem; padding-bottom: .3rem; border-bottom: 1px solid var(--border); }
+.sec-body h4 { margin-top: 1.2rem; font-size: .96rem; }
+
+mark.hl { background: #fde68a; color: #78350f; border-radius: 3px; padding: 0 .1em; }
+:root[data-theme="dark"] mark.hl { background: #92400e; color: #fde68a; }
+
+.filtered-out { display: none !important; }
+
+/* ---- Back to top -------------------------------------------------------- */
+#backTop {
+  position: fixed; right: 1.25rem; bottom: 1.25rem; z-index: 800;
+  width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border-strong);
+  background: var(--panel); color: var(--text-soft); cursor: pointer; box-shadow: var(--shadow-lg);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transform: translateY(10px); pointer-events: none; transition: opacity .2s, transform .2s;
+}
+#backTop.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+#backTop:hover { color: var(--accent-text); border-color: var(--accent); }
+#backTop .ico { width: 20px; height: 20px; background: currentColor; -webkit-mask: var(--icon-up) center/contain no-repeat; mask: var(--icon-up) center/contain no-repeat; }
+
+/* ---- Footer ------------------------------------------------------------- */
+.doc-footer {
+  border-top: 1px solid var(--border); margin-top: 2rem; padding: 1.5rem 2.5rem;
+  color: var(--muted); font-size: .84rem; max-width: 1400px; margin-left: auto; margin-right: auto;
+}
+.doc-footer code { font-size: .8em; }
+
+/* ---- Icons (data-URI masks; monochrome, themeable via currentColor) ----- */
+:root {
+  --icon-search: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>');
+  --icon-chevron: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>');
+  --icon-file: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>');
+  --icon-folder: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>');
+  --icon-info: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>');
+  --icon-bulb: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M15.09 14c.18-.79.62-1.42 1.27-2A4.5 4.5 0 1 0 7.64 12c.65.58 1.09 1.21 1.27 2"/></svg>');
+  --icon-warn: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/></svg>');
+  --icon-key: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"/></svg>');
+  --icon-up: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>');
+  --icon-expand: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5M7 9l5-5 5 5"/></svg>');
+  --icon-collapse: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 20 5-5 5 5M7 4l5 5 5-5"/></svg>');
+  --icon-sun: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>');
+  --icon-moon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>');
+  --icon-print: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>');
+  --icon-copy: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>');
+}
+
+/* ---- Print -------------------------------------------------------------- */
+@media print {
+  .doc-header, .doc-toc, #backTop, #scrollProgress, .code-copy { display: none !important; }
+  .doc-layout { grid-template-columns: 1fr; }
+  .doc-content { padding: 0; }
+  .doc-section > details { box-shadow: none; border-color: #ccc; break-inside: avoid; }
+  body { background: #fff; }
+  a { color: inherit; }
+}
+
+/* ---- Index hub (DOCUMENTATION_INDEX.html) ------------------------------- */
+.index-wrap { max-width: 1180px; margin: 0 auto; padding: 2.5rem 2rem 5rem; }
+.index-hero { margin-bottom: 2rem; }
+.index-hero h1 { font-size: 2.3rem; margin: 0 0 .5rem; letter-spacing: -.02em; }
+.index-hero .lede { font-size: 1.15rem; color: var(--text-soft); margin: 0; max-width: 70ch; }
+.index-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 1.25rem; }
+.index-stats .stat { display: flex; flex-direction: column; }
+.index-stats .stat .num { font-size: 1.7rem; font-weight: 800; color: var(--accent-text); line-height: 1; }
+.index-stats .stat .lbl { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; margin-top: .3rem; }
+.index-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 1rem; margin: 1.75rem 0 0; }
+a.index-card { text-decoration: none; color: inherit; border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); padding: 1.15rem 1.25rem; display: flex; flex-direction: column; gap: .55rem; box-shadow: var(--shadow); transition: transform .12s, box-shadow .12s, border-color .12s; }
+a.index-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: var(--accent); text-decoration: none; }
+a.index-card .ic-title { font-size: 1.12rem; font-weight: 700; color: var(--text); font-family: var(--mono); }
+a.index-card .ic-desc { font-size: .9rem; color: var(--text-soft); line-height: 1.5; flex: 1 1 auto; }
+a.index-card .ic-badges { display: flex; flex-wrap: wrap; gap: .35rem; }
+a.index-card .ic-open { margin-top: .35rem; font-size: .8rem; font-weight: 700; color: var(--accent-text); display: inline-flex; align-items: center; gap: .3rem; }
+a.index-card .ic-open::after { content: "→"; transition: transform .12s; }
+a.index-card:hover .ic-open::after { transform: translateX(3px); }
+@media (max-width: 560px) { .index-wrap { padding: 1.5rem 1rem 3rem; } .index-grid { grid-template-columns: 1fr; } }
+
+  </style>
+</head>
+<body>
+  <div id="scrollProgress"></div>
+
+  <header class="doc-header">
+    <div class="brand">
+      <span class="kicker">Project Guide</span>
+      <span class="title">weather-trends</span>
+    </div>
+    <div class="spacer"></div>
+    <div class="doc-search">
+      <input id="docSearch" type="search" placeholder="Search this guide…" aria-label="Search documentation">
+      <span class="search-count"></span>
+    </div>
+    <div class="btn-group">
+      <button class="btn" id="expandAll" title="Expand all sections"><span class="ico" style="-webkit-mask:var(--icon-expand) center/contain no-repeat;mask:var(--icon-expand) center/contain no-repeat"></span><span class="label">Expand</span></button>
+      <button class="btn" id="collapseAll" title="Collapse all sections"><span class="ico" style="-webkit-mask:var(--icon-collapse) center/contain no-repeat;mask:var(--icon-collapse) center/contain no-repeat"></span><span class="label">Collapse</span></button>
+      <button class="btn" id="themeToggle" title="Toggle light / dark"><span class="ico"></span></button>
+      <button class="btn" id="printBtn" title="Print / Save as PDF"><span class="ico" style="-webkit-mask:var(--icon-print) center/contain no-repeat;mask:var(--icon-print) center/contain no-repeat"></span></button>
+    </div>
+  </header>
+
+  <div class="doc-layout">
+    <nav class="doc-toc" id="docToc"><div class="toc-title">Contents</div></nav>
+
+    <main class="doc-content">
+      <div class="doc-content-inner">
+
+        <section class="doc-hero">
+          <h1>weather-trends</h1>
+          <p class="lede">A data-driven global temperature trend analyzer: fetches historical daily temperatures (1940–2025) for 12 representative cities from the Open-Meteo Archive API, computes per-location anomalies and a significance-tested linear trend, and renders publication-quality charts.</p>
+          <div class="badge-row">
+            <span class="badge accent">CLI tool · Python</span>
+            <span class="badge green">Phase 1 · active (refactor in progress)</span>
+            <span class="badge purple">pandas · scipy · seaborn</span>
+            <span class="badge">v0.2.0</span>
+          </div>
+          <div class="meta-grid">
+            <div class="meta-item"><div class="meta-k">Stack</div><div class="meta-v">Python 3.13 · pandas · numpy · scipy · seaborn · httpx · Pydantic v2</div></div>
+            <div class="meta-item"><div class="meta-k">Data source</div><div class="meta-v">Open-Meteo Archive API (no key)</div></div>
+            <div class="meta-item"><div class="meta-k">Entry point</div><div class="meta-v">weather_trend.py (legacy) → src/cli.py (target)</div></div>
+            <div class="meta-item"><div class="meta-k">Package mgr</div><div class="meta-v">uv · pyproject.toml</div></div>
+            <div class="meta-item"><div class="meta-k">CI</div><div class="meta-v">GitHub Actions</div></div>
+            <div class="meta-item"><div class="meta-k">Status</div><div class="meta-v">Modules extracted: config, fetcher, mock_data, models · analyzer/visualizer/cli pending</div></div>
+          </div>
+        </section>
+
+        <section class="doc-section" id="overview">
+          <details open>
+            <summary><span class="sec-num">1</span><h2>Overview — what this is &amp; why</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">A reproducible, transparent pipeline that turns raw weather-archive data into an observed-warming trend chart, with no preprocessed climate datasets in between.</p>
+
+              <p><strong>weather-trends</strong> answers a single question with full traceability: <em>how much has temperature actually risen over a long observation window, and is that rise statistically significant?</em> It pulls daily mean temperature (<code>temperature_2m_mean</code>) for a globally-distributed set of 12 cities from the free Open-Meteo Archive API, converts each city's yearly average into an <strong>anomaly</strong> relative to that city's own long-run baseline (so absolute climate differences between, say, Singapore and Moscow cancel out), aggregates those anomalies into a single global yearly series, and fits a linear regression to extract a <strong>slope in °C/year</strong> along with its p-value and R².</p>
+
+              <p>The whole flow is <strong>data-driven</strong>: there is no hard-coded temperature data anywhere. Numbers come either from the live API or from a deterministic <strong>mock generator</strong> that synthesizes physically-plausible data (latitude-dependent baseline, hemisphere-correct seasonality, AR(1) weather persistence, and a planted warming trend) so the tool runs and tests pass entirely offline when the API rate-limits.</p>
+
+              <div class="callout key"><div class="callout-title">Key concept</div><div class="callout-body">The unit of analysis is the <strong>anomaly</strong>, not the raw temperature. Each city is mean-centered against its own baseline before aggregation, so the global series measures <em>change</em>, not the meaningless average of 12 unrelated climates.</div></div>
+
+              <p><strong>Current state (Phase 1).</strong> A working single-file prototype, <code class="fileref" data-path="weather_trend.py">weather_trend.py</code> (~407 lines), exists and runs end-to-end. The project is mid-refactor into a typed, tested <code class="fileref dir" data-path="src/">src/</code> package. Today, <code class="fileref" data-path="src/config.py">config.py</code>, <code class="fileref" data-path="src/fetcher.py">fetcher.py</code>, <code class="fileref" data-path="src/mock_data.py">mock_data.py</code>, and the four Pydantic models under <code class="fileref dir" data-path="src/models/">src/models/</code> are extracted and tested. The <strong>analyzer</strong>, <strong>visualizer</strong>, and <strong>cli</strong> modules named in the plan (<code>src/analyzer.py</code>, <code>src/visualizer.py</code>, <code>src/cli.py</code>) are <em>not yet created</em> — their logic still lives inside the legacy monolith <code class="fileref" data-path="weather_trend.py">weather_trend.py</code>.</p>
+
+              <div class="callout warn"><div class="callout-title">Watch out</div><div class="callout-body">Several docs describe the <em>target</em> design as if it were built. The module names <code>src/analyzer.py</code>, <code>src/visualizer.py</code>, <code>src/cli.py</code>, the <code>tests/conftest.py</code> + <code>tests/test_analyzer.py</code> + <code>tests/test_visualizer.py</code> test files, and a <code>.gitlab-ci.yml</code> pipeline are named in <code class="fileref" data-path="README.md">README.md</code>, <code class="fileref" data-path="CLAUDE.md">CLAUDE.md</code>, and <code class="fileref" data-path="docs/WEATHER_TRENDS_MASTER_PLAN.md">docs/WEATHER_TRENDS_MASTER_PLAN.md</code> but do <strong>not exist on disk</strong>. CI is in fact <strong>GitHub Actions</strong> (<code class="fileref" data-path=".github/workflows/ci.yml">.github/workflows/ci.yml</code>), not GitLab. The Docker <code>CMD</code> runs <code>python -m src.cli</code>, which will fail until that module is written. This guide labels every such gap explicitly and references only files that actually exist.</div></div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="status">
+          <details>
+            <summary><span class="sec-num">2</span><h2>Status &amp; at-a-glance</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">What is built and works today versus what the plan still calls for.</p>
+
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Aspect</th><th>State</th><th>Notes</th></tr></thead>
+                <tbody>
+                  <tr><td>Phase</td><td>1 — CLI Script</td><td>Refactor of legacy monolith into typed modules.</td></tr>
+                  <tr><td>Source-of-truth version</td><td><code>0.2.0</code></td><td>From <code class="fileref" data-path="pyproject.toml">pyproject.toml</code> <code>[project].version</code>.</td></tr>
+                  <tr><td>Legacy prototype</td><td>Works</td><td><code class="fileref" data-path="weather_trend.py">weather_trend.py</code> runs fetch → analyze → plot via <code>plt.show()</code>.</td></tr>
+                  <tr><td>Extracted modules</td><td>config, fetcher, mock_data, models</td><td>All typed, all under test.</td></tr>
+                  <tr><td>Pending modules</td><td>analyzer, visualizer, cli</td><td>Named in the plan; not yet on disk.</td></tr>
+                  <tr><td>Tests</td><td>36 functions across 4 files</td><td><code class="fileref dir" data-path="tests/">tests/</code> covers config (8), fetcher (9), mock_data (8), models (11); parametrization expands the runtime case count higher (<code class="fileref" data-path="docs/status.md">docs/status.md</code> reports 42).</td></tr>
+                  <tr><td>Coverage gate</td><td>100% (CI-enforced)</td><td><code>--cov-fail-under=100</code> in CI; <code>fail_under = 100</code> in pyproject.</td></tr>
+                  <tr><td>CI platform</td><td>GitHub Actions</td><td><code class="fileref" data-path=".github/workflows/ci.yml">.github/workflows/ci.yml</code> — <em>not</em> GitLab, despite doc text.</td></tr>
+                  <tr><td>Container</td><td>Builds; CMD will fail</td><td>Image builds, but <code>CMD ["uv","run","python","-m","src.cli"]</code> needs <code>cli.py</code>.</td></tr>
+                </tbody>
+              </table></div>
+
+              <div class="callout note"><div class="callout-title">Note</div><div class="callout-body"><code class="fileref" data-path="docs/versions.md">docs/versions.md</code> documents up to <code>v0.1.1</code> while <code class="fileref" data-path="pyproject.toml">pyproject.toml</code> is already at <code>0.2.0</code> (a <code>release: v0.2.0</code> commit landed via the release workflow). The <code>v0.2.0</code> changelog entry has not been backfilled — a doc-freshness gap to close.</div></div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="tech-stack">
+          <details>
+            <summary><span class="sec-num">3</span><h2>Tech stack</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">Every dependency is pinned in <code class="fileref" data-path="pyproject.toml">pyproject.toml</code>. Choices are deliberate and non-negotiable per the project rules — no <code>requests</code>, no polars, no plotly.</p>
+
+              <div class="stack-grid">
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">Python</span><span class="stack-ver">3.13+</span></div>
+                  <div class="stack-why"><code>requires-python = "&gt;=3.13"</code>. Every module opens with <code>from __future__ import annotations</code>.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="pyproject.toml">pyproject.toml</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">httpx</span><span class="stack-ver">&ge;0.27</span></div>
+                  <div class="stack-why">HTTP client for the archive API. Replaces <code>requests</code> (still used only in the legacy prototype). Injectable <code>httpx.Client</code> enables <code>MockTransport</code> in tests.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="src/fetcher.py">src/fetcher.py</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">pandas</span><span class="stack-ver">&ge;2.2</span></div>
+                  <div class="stack-why">Canonical DataFrame for every stage. Chosen over polars for ecosystem maturity. The shared contract is the column set <code>time, temperature_2m_mean, location, lat, lon</code>.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="src/fetcher.py">src/fetcher.py</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">numpy</span><span class="stack-ver">&ge;2.0</span></div>
+                  <div class="stack-why">Vectorized math: fractional-year arrays, AR(1) noise, anomaly arithmetic, regression inputs. Explicit <code>dtype=float</code> throughout.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="src/mock_data.py">src/mock_data.py</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">scipy</span><span class="stack-ver">&ge;1.14</span></div>
+                  <div class="stack-why"><code>scipy.stats.linregress</code> provides slope, intercept, R², and an accurate two-sided p-value in one call. The preferred path; the polyfit fallback exists only in the legacy file.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="weather_trend.py">weather_trend.py:262</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">matplotlib + seaborn</span><span class="stack-ver">&ge;3.9 / &ge;0.13</span></div>
+                  <div class="stack-why">Static, publication-quality charts at 300 DPI. Chosen over plotly/bokeh. seaborn dependency is declared but not yet imported (the legacy plot uses raw matplotlib).</div>
+                  <div class="stack-foot"><code class="fileref" data-path="weather_trend.py">weather_trend.py:300</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">Pydantic</span><span class="stack-ver">v2 (&ge;2.6)</span></div>
+                  <div class="stack-why">Typed data contracts with field validation (lat/lon bounds, non-empty names, non-negative stats). One model per file under <code class="fileref dir" data-path="src/models/">src/models/</code>.</div>
+                  <div class="stack-foot"><code class="fileref dir" data-path="src/models/">src/models/</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">pytest + pytest-cov</span><span class="stack-ver">&ge;8.0 / &ge;5.0</span></div>
+                  <div class="stack-why">Test runner and coverage. <code>asyncio_mode = "auto"</code> set forward-compatibly. 100% coverage is a hard CI gate.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="pyproject.toml">pyproject.toml</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">ruff</span><span class="stack-ver">&ge;0.8</span></div>
+                  <div class="stack-why">Single lint+format tool. <code>line-length = 120</code>, rules <code>E,F,I,N,UP,ANN</code>. <code>ANN</code> ignored under <code>tests/*</code>.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="pyproject.toml">pyproject.toml</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">uv + hatchling</span><span class="stack-ver">—</span></div>
+                  <div class="stack-why">uv for dependency resolution and running; hatchling builds the wheel (<code>packages = ["src"]</code>). <code class="fileref" data-path="uv.lock">uv.lock</code> pins the full graph.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="pyproject.toml">pyproject.toml</code></div>
+                </div>
+                <div class="stack-card">
+                  <div class="stack-head"><span class="stack-name">Docker</span><span class="stack-ver">python:3.13-slim</span></div>
+                  <div class="stack-why">glibc base for scipy/numpy wheel compatibility. Single-service compose, bind-mounts <code>output/</code> for charts.</div>
+                  <div class="stack-foot"><code class="fileref" data-path="Dockerfile">Dockerfile</code></div>
+                </div>
+              </div>
+
+              <div class="callout danger"><div class="callout-title">Do not</div><div class="callout-body">Do not reintroduce <code>requests</code>, polars, or plotly anywhere in <code>src/</code>. <code>requests</code> appears only in <code class="fileref" data-path="weather_trend.py">weather_trend.py</code> and is slated for removal when the fetcher fully supersedes the monolith.</div></div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="architecture">
+          <details>
+            <summary><span class="sec-num">4</span><h2>Architecture</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">A linear batch pipeline: a data source (live or mock) emits one canonical DataFrame, an analyzer reduces it to a yearly anomaly series plus a trend stat, and a visualizer turns those into PNGs.</p>
+
+              <p>There are no long-running processes, no servers, and no persistence in Phase 1. The target design has the program run, write charts to an <code>output/</code> directory (created at runtime, gitignored — see the <code>OUTPUT_DIR</code> constant in <code class="fileref" data-path="src/config.py:19">src/config.py:19</code>), and exit. Today the working prototype <code class="fileref" data-path="weather_trend.py">weather_trend.py</code> instead opens an interactive window via <code>plt.show()</code>. The single most important architectural invariant is the <strong>DataFrame contract</strong>: every source (fetcher, mock generator, and — in Phase 3 — a database query) produces the exact same five columns, so the analyzer is source-agnostic.</p>
+
+              <figure class="diagram">
+                <div class="mermaid">
+graph TD
+    API[Open-Meteo Archive API] -->|httpx GET| FET[WeatherDataFetcher]
+    MOCK[MockDataGenerator] -.fallback / offline.-> DF
+    FET --> DF[(Canonical DataFrame)]
+    DF --> AN[TrendAnalyzer - planned]
+    AN --> YA[Yearly anomaly series]
+    AN --> TR[TrendResult slope p R2]
+    YA --> VIZ[TrendVisualizer - planned]
+    TR --> VIZ
+    VIZ --> PNG[PNG charts in output]
+    CLI[CLI entrypoint - planned] --> FET
+    CLI --> MOCK
+    CLI --> AN
+    CLI --> VIZ
+    CFG[config.py] --> FET
+    CFG --> MOCK
+                </div>
+                <div class="mermaid-fallback"><figure class="code"><figcaption>diagram source · mermaid</figcaption><pre><code>graph TD
+    API[Open-Meteo Archive API] --&gt;|httpx GET| FET[WeatherDataFetcher]
+    MOCK[MockDataGenerator] -.fallback / offline.-&gt; DF
+    FET --&gt; DF[(Canonical DataFrame)]
+    DF --&gt; AN[TrendAnalyzer - planned]
+    AN --&gt; YA[Yearly anomaly series]
+    AN --&gt; TR[TrendResult slope p R2]
+    YA --&gt; VIZ[TrendVisualizer - planned]
+    TR --&gt; VIZ
+    VIZ --&gt; PNG[PNG charts in output]
+    CLI[CLI entrypoint - planned] --&gt; FET
+    CLI --&gt; MOCK
+    CLI --&gt; AN
+    CLI --&gt; VIZ
+    CFG[config.py] --&gt; FET
+    CFG --&gt; MOCK</code></pre></figure></div>
+                <figcaption>Target Phase-1 topology. Solid = built; "planned" nodes are still inside <code>weather_trend.py</code>.</figcaption>
+              </figure>
+
+              <p><strong>Where things actually live today.</strong> The boxes labelled <em>TrendAnalyzer</em>, <em>TrendVisualizer</em>, and <em>CLI entrypoint</em> are the planned module split. In the current tree their behavior is implemented inside <code class="fileref" data-path="weather_trend.py">weather_trend.py</code> as the methods <code>visualize_weather_data()</code> (anomaly + regression + plot, combined), <code>generate_summary_report()</code> (text summary + decade averages), and <code>run_analysis()</code> (orchestration).</p>
+
+              <h3 class="anchor">End-to-end sequence (legacy run)</h3>
+              <figure class="diagram">
+                <div class="mermaid">
+sequenceDiagram
+    participant U as run_analysis
+    participant C as collect_global_data
+    participant API as Open-Meteo
+    participant M as mock_weather_data
+    participant V as visualize_weather_data
+    participant R as generate_summary_report
+    U->>C: fetch 12 cities 1940-2025
+    C->>API: GET archive per city
+    API-->>C: daily temps or limit-exceeded
+    alt rate limited
+        U->>M: synthesize fallback data
+        M-->>U: DataFrame
+    end
+    U->>V: combined DataFrame
+    V->>V: anomalies + linregress + plot
+    V-->>U: yearly_avg
+    U->>R: yearly_avg
+    R-->>U: printed summary + decade averages
+                </div>
+                <div class="mermaid-fallback"><figure class="code"><figcaption>diagram source · mermaid</figcaption><pre><code>sequenceDiagram
+    participant U as run_analysis
+    participant C as collect_global_data
+    participant API as Open-Meteo
+    participant M as mock_weather_data
+    participant V as visualize_weather_data
+    participant R as generate_summary_report
+    U-&gt;&gt;C: fetch 12 cities 1940-2025
+    C-&gt;&gt;API: GET archive per city
+    API--&gt;&gt;C: daily temps or limit-exceeded
+    alt rate limited
+        U-&gt;&gt;M: synthesize fallback data
+        M--&gt;&gt;U: DataFrame
+    end
+    U-&gt;&gt;V: combined DataFrame
+    V-&gt;&gt;V: anomalies + linregress + plot
+    V--&gt;&gt;U: yearly_avg
+    U-&gt;&gt;R: yearly_avg
+    R--&gt;&gt;U: printed summary + decade averages</code></pre></figure></div>
+                <figcaption>Control flow inside <code>weather_trend.py</code>, the working prototype.</figcaption>
+              </figure>
+
+              <h3 class="anchor">Refactored module dependencies (target)</h3>
+              <figure class="diagram">
+                <div class="mermaid">
+graph LR
+    CLI[cli.py] --> FET[fetcher.py]
+    CLI --> MD[mock_data.py]
+    CLI --> AN[analyzer.py]
+    CLI --> VIZ[visualizer.py]
+    FET --> CFG[config.py]
+    MD --> CFG
+    FET --> MODELS[models]
+    MD --> MODELS
+    CFG --> MODELS
+    AN --> SP[scipy.stats.linregress]
+    VIZ --> SNS[seaborn + matplotlib]
+                </div>
+                <div class="mermaid-fallback"><figure class="code"><figcaption>diagram source · mermaid</figcaption><pre><code>graph LR
+    CLI[cli.py] --&gt; FET[fetcher.py]
+    CLI --&gt; MD[mock_data.py]
+    CLI --&gt; AN[analyzer.py]
+    CLI --&gt; VIZ[visualizer.py]
+    FET --&gt; CFG[config.py]
+    MD --&gt; CFG
+    FET --&gt; MODELS[models]
+    MD --&gt; MODELS
+    CFG --&gt; MODELS
+    AN --&gt; SP[scipy.stats.linregress]
+    VIZ --&gt; SNS[seaborn + matplotlib]</code></pre></figure></div>
+                <figcaption>Solid arrows that exist today: cli→(none yet), fetcher→config→models, mock_data→config→models.</figcaption>
+              </figure>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="structure">
+          <details>
+            <summary><span class="sec-num">5</span><h2>Directory structure</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">Annotated map of what exists on disk right now. Heavy/generated dirs (<code>.git</code>, <code>__pycache__</code>, <code>output</code>) are omitted.</p>
+
+              <div class="filelist">
+                <div class="filecard"><code class="fileref" data-path="weather_trend.py">weather_trend.py</code><span class="filecard-desc">Legacy single-file prototype. The <code>GlobalWeatherAnalyzer</code> class: fetch, mock, anomaly+trend, plot, summary. Still the only runnable end-to-end path.</span></div>
+                <div class="filecard"><code class="fileref dir" data-path="src/">src/</code><span class="filecard-desc">The refactored package. Hatchling builds this as the wheel.</span></div>
+                <div class="filecard"><code class="fileref" data-path="src/__init__.py">src/__init__.py</code><span class="filecard-desc">Package docstring only.</span></div>
+                <div class="filecard"><code class="fileref" data-path="src/config.py">src/config.py</code><span class="filecard-desc">All constants and the 12-city <code>LOCATIONS</code> list (as <code>Location</code> models). API URL, date range, retry config, output dir, DPI.</span></div>
+                <div class="filecard"><code class="fileref" data-path="src/fetcher.py">src/fetcher.py</code><span class="filecard-desc"><code>WeatherDataFetcher</code> — httpx client with bounded retry, rate-limit detection, and payload→DataFrame mapping.</span></div>
+                <div class="filecard"><code class="fileref" data-path="src/mock_data.py">src/mock_data.py</code><span class="filecard-desc"><code>MockDataGenerator</code> — deterministic synthetic temperatures with latitude baseline, seasonality, AR(1) noise, planted trend.</span></div>
+                <div class="filecard"><code class="fileref dir" data-path="src/models/">src/models/</code><span class="filecard-desc">Pydantic v2 data contracts — one model per file.</span></div>
+                <div class="filecard"><code class="fileref" data-path="src/models/__init__.py">src/models/__init__.py</code><span class="filecard-desc">Re-exports the four models for ergonomic imports.</span></div>
+                <div class="filecard"><code class="fileref" data-path="src/models/location.py">src/models/location.py</code><span class="filecard-desc"><code>Location</code>: name + lat/lon with WGS84 bounds.</span></div>
+                <div class="filecard"><code class="fileref" data-path="src/models/daily_temperature_record.py">src/models/daily_temperature_record.py</code><span class="filecard-desc"><code>DailyTemperatureRecord</code>: one API row; temperature may be null.</span></div>
+                <div class="filecard"><code class="fileref" data-path="src/models/yearly_anomaly.py">src/models/yearly_anomaly.py</code><span class="filecard-desc"><code>YearlyAnomaly</code>: per-year mean anomaly + std/n/se/ci95.</span></div>
+                <div class="filecard"><code class="fileref" data-path="src/models/trend_result.py">src/models/trend_result.py</code><span class="filecard-desc"><code>TrendResult</code>: slope/intercept/R²/p-value + unit label.</span></div>
+                <div class="filecard"><code class="fileref dir" data-path="tests/">tests/</code><span class="filecard-desc">pytest suite mirroring <code>src/</code>.</span></div>
+                <div class="filecard"><code class="fileref" data-path="tests/test_config.py">tests/test_config.py</code><span class="filecard-desc">Asserts 12 unique locations, URL, date range, sane retry/DPI config.</span></div>
+                <div class="filecard"><code class="fileref" data-path="tests/test_fetcher.py">tests/test_fetcher.py</code><span class="filecard-desc">httpx <code>MockTransport</code> tests: success, params, rate-limit, retry, persistent failure, client ownership.</span></div>
+                <div class="filecard"><code class="fileref" data-path="tests/test_mock_data.py">tests/test_mock_data.py</code><span class="filecard-desc">Trend recoverability, hemisphere phase, seed reproducibility, missing-rate, AR(1) seeding.</span></div>
+                <div class="filecard"><code class="fileref" data-path="tests/test_models.py">tests/test_models.py</code><span class="filecard-desc">Pydantic validation: bounds, empty names, null temps, out-of-range stats.</span></div>
+                <div class="filecard"><code class="fileref dir" data-path="docs/">docs/</code><span class="filecard-desc">Master plan, status, versions.</span></div>
+                <div class="filecard"><code class="fileref" data-path="docs/WEATHER_TRENDS_MASTER_PLAN.md">docs/WEATHER_TRENDS_MASTER_PLAN.md</code><span class="filecard-desc">Authoritative plan: vision, phases, data flow, tech choices, city table.</span></div>
+                <div class="filecard"><code class="fileref" data-path="docs/status.md">docs/status.md</code><span class="filecard-desc">Live state of the refactor.</span></div>
+                <div class="filecard"><code class="fileref" data-path="docs/versions.md">docs/versions.md</code><span class="filecard-desc">Semver changelog (currently behind pyproject).</span></div>
+                <div class="filecard"><code class="fileref" data-path="CLAUDE.md">CLAUDE.md</code><span class="filecard-desc">AI/dev guidelines: workflow, rules, contracts, phase constraints.</span></div>
+                <div class="filecard"><code class="fileref" data-path="AGENTS.md">AGENTS.md</code><span class="filecard-desc">Near-identical sibling of CLAUDE.md for Codex/other agents.</span></div>
+                <div class="filecard"><code class="fileref" data-path="README.md">README.md</code><span class="filecard-desc">Human-facing overview, architecture diagram, run instructions.</span></div>
+                <div class="filecard"><code class="fileref" data-path="pyproject.toml">pyproject.toml</code><span class="filecard-desc">Deps, build, pytest, coverage, ruff config. Version source of truth.</span></div>
+                <div class="filecard"><code class="fileref" data-path="uv.lock">uv.lock</code><span class="filecard-desc">Resolved dependency lockfile.</span></div>
+                <div class="filecard"><code class="fileref" data-path="Dockerfile">Dockerfile</code><span class="filecard-desc">python:3.13-slim image; installs via uv; CMD runs <code>src.cli</code>.</span></div>
+                <div class="filecard"><code class="fileref" data-path="docker-compose.yml">docker-compose.yml</code><span class="filecard-desc">Single service; bind-mounts <code>output/</code>.</span></div>
+                <div class="filecard"><code class="fileref" data-path=".dockerignore">.dockerignore</code><span class="filecard-desc">Excludes caches, docs, env, output from build context.</span></div>
+                <div class="filecard"><code class="fileref dir" data-path=".github/workflows/">.github/workflows/</code><span class="filecard-desc">GitHub Actions: CI + release.</span></div>
+                <div class="filecard"><code class="fileref" data-path=".github/workflows/ci.yml">.github/workflows/ci.yml</code><span class="filecard-desc">lint → test → build → docker-build.</span></div>
+                <div class="filecard"><code class="fileref" data-path=".github/workflows/release.yml">.github/workflows/release.yml</code><span class="filecard-desc">Manual semver bump + tag via <code>uv version</code>.</span></div>
+                <div class="filecard"><code class="fileref" data-path="run_weather_trends.sh">run_weather_trends.sh</code><span class="filecard-desc">macOS/Linux launcher with k/q/v/r menu loop.</span></div>
+                <div class="filecard"><code class="fileref" data-path="run_weather_trends.bat">run_weather_trends.bat</code><span class="filecard-desc">Windows launcher, same menu via goto labels.</span></div>
+                <div class="filecard"><code class="fileref dir" data-path=".agents/skills/">.agents/skills/</code><span class="filecard-desc">Proactive agent skills: data-driven-check, phase-awareness, validation-protocol.</span></div>
+                <div class="filecard"><code class="fileref dir" data-path=".codex/commands/">.codex/commands/</code><span class="filecard-desc">Slash-command specs: scaffold, review, validate, pre-commit.</span></div>
+                <div class="filecard"><code class="fileref dir" data-path="scripts/hooks/">scripts/hooks/</code><span class="filecard-desc">Node-based agent hooks (pre/post-tool-use, stop, memory).</span></div>
+                <div class="filecard"><code class="fileref" data-path="Global Warming.png">Global Warming.png</code><span class="filecard-desc">A saved example chart image checked into the repo root.</span></div>
+                <div class="filecard"><code class="fileref" data-path="claude-teams.sh">claude-teams.sh</code><span class="filecard-desc">Helper for multi-agent ("claude team") enablement.</span></div>
+              </div>
+
+              <div class="callout note"><div class="callout-title">Note</div><div class="callout-body">There is no <code>output/</code> directory committed (it is gitignored and created at runtime), no <code>.env</code>/<code>.env.example</code>, no <code>conftest.py</code>, and no <code>.gitlab-ci.yml</code>. The plan's "target" tree in <code class="fileref" data-path="CLAUDE.md">CLAUDE.md</code> §5 lists files that are intentionally not built yet.</div></div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="modules">
+          <details>
+            <summary><span class="sec-num">6</span><h2>Core modules</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">The heart of the doc. Each drill-down covers what the module does, the key logic, and exact file/line references.</p>
+
+              <details class="sub">
+                <summary>Configuration <span class="sub-tag">src/config.py</span></summary>
+                <div class="sub-body">
+                  <p>The single home for every constant and the canonical city list. Nothing domain-specific is hard-coded outside this file — that is the data-driven rule enforced by the <code>data-driven-check</code> skill.</p>
+                  <div class="filelist">
+                    <div class="filecard"><code class="fileref" data-path="src/config.py:8">src/config.py:8</code><span class="filecard-desc"><code>API_BASE_URL</code>, <code>DAILY_VARIABLE = "temperature_2m_mean"</code>, <code>API_TIMEZONE = "UTC"</code>.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/config.py:12">src/config.py:12</code><span class="filecard-desc"><code>DEFAULT_START_DATE = "1940-01-01"</code>, <code>DEFAULT_END_DATE = "2025-12-31"</code>.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/config.py:15">src/config.py:15</code><span class="filecard-desc">Retry knobs: <code>RATE_LIMIT_BACKOFF_SECONDS = 60</code>, <code>MAX_RETRIES = 3</code>, <code>HTTP_TIMEOUT_SECONDS = 30</code>.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/config.py:19">src/config.py:19</code><span class="filecard-desc"><code>OUTPUT_DIR</code> from <code>$OUTPUT_DIR</code> env (default <code>output</code>); <code>CHART_DPI = 300</code>.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/config.py:23">src/config.py:23</code><span class="filecard-desc"><code>LOCATIONS</code>: list of 12 <code>Location</code> models — the only place coordinates live.</span></div>
+                  </div>
+                  <div class="callout key"><div class="callout-title">Key concept</div><div class="callout-body"><code>OUTPUT_DIR</code> is the one runtime-configurable value, read from the environment. The compose file sets it to <code>/app/output</code> inside the container.</div></div>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Weather data fetcher <span class="sub-tag">src/fetcher.py</span></summary>
+                <div class="sub-body">
+                  <p><code>WeatherDataFetcher</code> wraps an injectable <code>httpx.Client</code>. <code>fetch_location()</code> issues a GET per city, then dispatches on status: <strong>200</strong> → parse to DataFrame; a response body containing a rate-limit marker → raise <code>RateLimitExceededError</code> immediately (no point retrying); any other non-200 → sleep and retry up to <code>MAX_RETRIES</code>. If all attempts fail it raises <code>WeatherFetchError</code>. <code>fetch_all()</code> maps over locations and <code>pd.concat</code>s the frames.</p>
+                  <figure class="code">
+                    <figcaption>src/fetcher.py · retry + dispatch loop</figcaption>
+                    <pre><code>for attempt in range(1, MAX_RETRIES + 1):
+    response = self._client.get(API_BASE_URL, params=params)
+    last_status = response.status_code
+    if response.status_code == 200:
+        payload = response.json()
+        return _payload_to_dataframe(payload, location)
+    if any(marker in response.text for marker in RATE_LIMIT_MARKERS):
+        raise RateLimitExceededError(...)
+    if attempt &lt; MAX_RETRIES:
+        self._sleep(RATE_LIMIT_BACKOFF_SECONDS)
+raise WeatherFetchError(...)</code></pre>
+                  </figure>
+                  <p>The <code>sleep</code> callable is injected (defaults to <code>time.sleep</code>) so tests pass a no-op and run instantly. <code>_owns_client</code> tracks whether the fetcher created the client; <code>close()</code> only closes clients it owns, never an externally-supplied one.</p>
+                  <div class="filelist">
+                    <div class="filecard"><code class="fileref" data-path="src/fetcher.py:20">src/fetcher.py:20</code><span class="filecard-desc"><code>RATE_LIMIT_MARKERS</code> — the two Open-Meteo limit strings.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/fetcher.py:26">src/fetcher.py:26</code><span class="filecard-desc"><code>RateLimitExceededError</code> / <code>WeatherFetchError</code> custom exceptions.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/fetcher.py:50">src/fetcher.py:50</code><span class="filecard-desc"><code>fetch_location()</code> — the retry/dispatch core.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/fetcher.py:96">src/fetcher.py:96</code><span class="filecard-desc"><code>_payload_to_dataframe()</code> — adds <code>location/lat/lon</code> columns; raises if <code>daily</code> block missing.</span></div>
+                  </div>
+                  <div class="callout warn"><div class="callout-title">Watch out</div><div class="callout-body">The legacy prototype recurses on transient errors (<code class="fileref" data-path="weather_trend.py">weather_trend.py:66</code>) — an unbounded retry the refactor deliberately replaced with a bounded loop. Do not reintroduce recursion.</div></div>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Mock data generator <span class="sub-tag">src/mock_data.py</span></summary>
+                <div class="sub-body">
+                  <p><code>MockDataGenerator</code> synthesizes deterministic, physically-plausible temperatures so the tool (and the entire test suite) runs offline. For each location it builds a daily series from four additive components:</p>
+                  <ol class="steps">
+                    <li><strong>Latitude baseline:</strong> <code>base_mean = 28 - 0.45·|lat|</code> — ~28 °C at the equator, ~0 °C near 62°.</li>
+                    <li><strong>Seasonality:</strong> amplitude grows with latitude (<code>3 + 0.22·|lat|</code>); a cosine peaks mid-year in the northern hemisphere and flips sign in the southern.</li>
+                    <li><strong>AR(1) weather noise:</strong> <code>ar[i] = phi·ar[i-1] + eps[i]</code> for day-to-day persistence.</li>
+                    <li><strong>Linear warming trend:</strong> <code>trend_c_per_year · (frac_year - year0)</code> plus a small per-location residual.</li>
+                  </ol>
+                  <figure class="code">
+                    <figcaption>src/mock_data.py · the corrected seasonal term</figcaption>
+                    <pre><code>hemisphere_sign = -1.0 if loc.lat &lt; 0 else 1.0
+seasonal = -hemisphere_sign * amp * np.cos(2 * np.pi * doy / DAYS_PER_YEAR)
+...
+temp = base_mean + seasonal + loc_residual + trend + ar</code></pre>
+                  </figure>
+                  <div class="callout key"><div class="callout-title">Key concept</div><div class="callout-body">The cosine form is load-bearing. The v0.1.1 fix replaced a <code>sin(2π·doy/365.25)</code> term (which peaked in April and correlated with <code>frac_year</code>, biasing the recovered slope to ~half its planted value) with <code>-hemisphere_sign·cos(...)</code>. Cosine over a full year is <strong>orthogonal</strong> to the linear time axis, so a regression recovers the planted trend cleanly. See <code class="fileref" data-path="docs/versions.md">docs/versions.md</code>.</div></div>
+                  <div class="filelist">
+                    <div class="filecard"><code class="fileref" data-path="src/mock_data.py:10">src/mock_data.py:10</code><span class="filecard-desc">Named constants: <code>BASE_TEMP_EQUATOR_C</code>, <code>SEASONAL_AMP_*</code>, <code>DAYS_PER_YEAR</code>, <code>MISSING_DROP_SCALE</code>.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/mock_data.py:43">src/mock_data.py:43</code><span class="filecard-desc"><code>generate()</code> — builds the per-location frames and concatenates.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/mock_data.py:95">src/mock_data.py:95</code><span class="filecard-desc"><code>_ar1_noise()</code> — the autoregressive noise helper (Python loop; acceptable here, not in analysis hot paths).</span></div>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Data models <span class="sub-tag">src/models/</span></summary>
+                <div class="sub-body">
+                  <p>Four Pydantic v2 models, one per file, re-exported via <code class="fileref" data-path="src/models/__init__.py">src/models/__init__.py</code>. They are the typed contracts that cross every boundary (config → fetcher → analyzer → visualizer, and later → database).</p>
+                  <div class="filelist">
+                    <div class="filecard"><code class="fileref" data-path="src/models/location.py">src/models/location.py</code><span class="filecard-desc"><code>Location</code> — <code>name</code> (min length 1), <code>lat ∈ [-90,90]</code>, <code>lon ∈ [-180,180]</code>.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/models/daily_temperature_record.py">src/models/daily_temperature_record.py</code><span class="filecard-desc"><code>DailyTemperatureRecord</code> — one API row; <code>temperature_2m_mean</code> is <code>float | None</code> (gaps allowed).</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/models/yearly_anomaly.py">src/models/yearly_anomaly.py</code><span class="filecard-desc"><code>YearlyAnomaly</code> — <code>year ∈ [1800,2200]</code>, <code>mean_anomaly</code>, non-negative <code>std/se/ci95</code>, <code>n ≥ 1</code>.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="src/models/trend_result.py">src/models/trend_result.py</code><span class="filecard-desc"><code>TrendResult</code> — <code>slope/intercept</code>, <code>r_squared ∈ [0,1]</code>, <code>p_value ∈ [0,1]</code>, <code>slope_unit = "degC/year"</code>.</span></div>
+                  </div>
+                  <div class="callout note"><div class="callout-title">Note</div><div class="callout-body"><code>YearlyAnomaly</code> and <code>TrendResult</code> are defined and validated by tests, but nothing constructs them yet — the planned <code>analyzer.py</code> will. Today the legacy code carries the same data as raw DataFrame columns and locals.</div></div>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Legacy prototype <span class="sub-tag">weather_trend.py</span></summary>
+                <div class="sub-body">
+                  <p>The original <code>GlobalWeatherAnalyzer</code> class. It still contains the only working anomaly + regression + plotting code, which the refactor will lift into <code>analyzer.py</code> and <code>visualizer.py</code>. Key methods:</p>
+                  <div class="filelist">
+                    <div class="filecard"><code class="fileref" data-path="weather_trend.py:32">weather_trend.py:32</code><span class="filecard-desc"><code>fetch_weather_data()</code> — <code>requests</code>-based; recurses on errors; returns dict / <code>'limit exceeded'</code> / None.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="weather_trend.py:81">weather_trend.py:81</code><span class="filecard-desc"><code>collect_global_data()</code> — loops the 12 cities, concatenates frames.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="weather_trend.py:209">weather_trend.py:209</code><span class="filecard-desc"><code>visualize_weather_data()</code> — anomaly computation + <code>linregress</code> (with polyfit fallback) + a 2-panel matplotlib figure (trend + histogram).</span></div>
+                    <div class="filecard"><code class="fileref" data-path="weather_trend.py:337">weather_trend.py:337</code><span class="filecard-desc"><code>generate_summary_report()</code> — printed stats + per-decade averages.</span></div>
+                    <div class="filecard"><code class="fileref" data-path="weather_trend.py:372">weather_trend.py:372</code><span class="filecard-desc"><code>run_analysis()</code> — orchestrates collect → (mock fallback) → visualize → report.</span></div>
+                  </div>
+                  <div class="callout warn"><div class="callout-title">Watch out</div><div class="callout-body">This file uses <code>plt.show()</code> (interactive, blocking) rather than saving PNGs to <code>output/</code> — the opposite of the Phase-1 chart-output requirement. The visualizer refactor must switch to <code>fig.savefig(..., dpi=CHART_DPI)</code>.</div></div>
+                </div>
+              </details>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="data-model">
+          <details>
+            <summary><span class="sec-num">7</span><h2>Data models &amp; contracts</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">Two contracts matter: the <strong>DataFrame column set</strong> (the wire format between stages) and the four <strong>Pydantic models</strong>. Both are sacred — changing them is a minor-or-greater semver bump.</p>
+
+              <h3 class="anchor">The canonical DataFrame</h3>
+              <p>Every data source emits exactly these columns. The analyzer reads only these, so any source — live API, mock generator, or a future DB query — is interchangeable.</p>
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Column</th><th>Type</th><th>Meaning</th></tr></thead>
+                <tbody>
+                  <tr><td><code>time</code></td><td>str <code>YYYY-MM-DD</code></td><td>Observation date (parsed to datetime in analysis).</td></tr>
+                  <tr><td><code>temperature_2m_mean</code></td><td>float | NaN</td><td>Daily mean 2 m temperature in °C.</td></tr>
+                  <tr><td><code>location</code></td><td>str</td><td>City name (the group key for anomalies).</td></tr>
+                  <tr><td><code>lat</code></td><td>float</td><td>Latitude, decimal degrees.</td></tr>
+                  <tr><td><code>lon</code></td><td>float</td><td>Longitude, decimal degrees.</td></tr>
+                </tbody>
+              </table></div>
+
+              <h3 class="anchor">Pydantic models (ER view)</h3>
+              <figure class="diagram">
+                <div class="mermaid">
+erDiagram
+    LOCATION ||--o{ DAILY_RECORD : produces
+    DAILY_RECORD }o--|| YEARLY_ANOMALY : aggregates_into
+    YEARLY_ANOMALY ||--|| TREND_RESULT : regressed_to
+    LOCATION {
+        string name
+        float lat
+        float lon
+    }
+    DAILY_RECORD {
+        string time
+        float temperature_2m_mean
+        string location
+    }
+    YEARLY_ANOMALY {
+        int year
+        float mean_anomaly
+        float std
+        int n
+        float ci95
+    }
+    TREND_RESULT {
+        float slope
+        float p_value
+        float r_squared
+    }
+                </div>
+                <div class="mermaid-fallback"><figure class="code"><figcaption>diagram source · mermaid</figcaption><pre><code>erDiagram
+    LOCATION ||--o{ DAILY_RECORD : produces
+    DAILY_RECORD }o--|| YEARLY_ANOMALY : aggregates_into
+    YEARLY_ANOMALY ||--|| TREND_RESULT : regressed_to
+    LOCATION {
+        string name
+        float lat
+        float lon
+    }
+    DAILY_RECORD {
+        string time
+        float temperature_2m_mean
+        string location
+    }
+    YEARLY_ANOMALY {
+        int year
+        float mean_anomaly
+        float std
+        int n
+        float ci95
+    }
+    TREND_RESULT {
+        float slope
+        float p_value
+        float r_squared
+    }</code></pre></figure></div>
+                <figcaption>Conceptual flow from raw rows to a single trend statistic.</figcaption>
+              </figure>
+
+              <h3 class="anchor">Field reference</h3>
+              <dl class="doc-dl">
+                <dt>Location.lat / lon</dt><dd>WGS84 decimal degrees, validated to <code>[-90,90]</code> / <code>[-180,180]</code> at construction.</dd>
+                <dt>DailyTemperatureRecord.temperature_2m_mean</dt><dd><code>float | None</code> — the API returns null for gaps; the model preserves that rather than coercing to 0.</dd>
+                <dt>YearlyAnomaly.mean_anomaly</dt><dd>Global mean of per-location yearly anomalies, °C relative to each city's baseline.</dd>
+                <dt>YearlyAnomaly.se / ci95</dt><dd><code>se = std/√n</code>; <code>ci95 = 1.96·se</code> (95% confidence half-width).</dd>
+                <dt>TrendResult.slope</dt><dd>°C per year from the regression; <code>slope_unit</code> documents this explicitly.</dd>
+              </dl>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="key-logic">
+          <details>
+            <summary><span class="sec-num">8</span><h2>Key logic &amp; formulas</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">The analytical core: anomaly computation, cross-location aggregation with confidence intervals, and significance-tested linear regression.</p>
+
+              <h3 class="anchor">1 · Per-location anomalies</h3>
+              <p>Raw temperatures are first averaged per <code>(year, location)</code>. Each city's <strong>baseline</strong> is its mean across all years; the anomaly is the yearly value minus that baseline. This removes the absolute climate offset so a tropical and a continental city contribute on the same footing.</p>
+              <figure class="code">
+                <figcaption>weather_trend.py:217 · anomaly construction</figcaption>
+                <pre><code>loc_year = df.groupby(["year","location"])["temperature_2m_mean"].mean().reset_index()
+loc_baseline = loc_year.groupby("location")["temperature_2m_mean"].mean().rename("baseline").reset_index()
+loc_year = loc_year.merge(loc_baseline, on="location", how="left")
+loc_year["temp_anomaly"] = loc_year["temperature_2m_mean"] - loc_year["baseline"]</code></pre>
+              </figure>
+
+              <h3 class="anchor">2 · Yearly aggregation + 95% CI</h3>
+              <p>Anomalies are aggregated across cities per year into a mean, std, and count, from which standard error and the 95% confidence half-width follow.</p>
+              <div class="flow"><span class="node">mean over cities</span><span class="arrow">→</span><span class="node">std, n</span><span class="arrow">→</span><span class="node">se = std/√n</span><span class="arrow">→</span><span class="node">ci95 = 1.96·se</span></div>
+              <figure class="code">
+                <figcaption>weather_trend.py:236 · per-year stats</figcaption>
+                <pre><code>yearly = loc_year.groupby("year")["temp_anomaly"].agg(mean="mean", std="std", n="count").reset_index()
+yearly["se"]   = yearly["std"] / np.sqrt(yearly["n"])
+yearly["ci95"] = 1.96 * yearly["se"]</code></pre>
+              </figure>
+
+              <h3 class="anchor">3 · Trend regression</h3>
+              <p>A linear regression of yearly mean anomaly on year gives the warming rate. The preferred path is <code>scipy.stats.linregress</code>, which returns slope, intercept, R² (=<code>rvalue²</code>), and a two-sided p-value in one call. The legacy file keeps a manual polyfit + Student-t fallback for environments without scipy; the refactor drops the fallback (scipy is a hard dependency).</p>
+              <figure class="code">
+                <figcaption>weather_trend.py:262 · regression</figcaption>
+                <pre><code>from scipy import stats
+res = stats.linregress(x, y)        # x = years, y = yearly mean anomaly
+slope     = res.slope               # degC / year
+intercept = res.intercept
+p_value   = res.pvalue
+r2        = res.rvalue ** 2</code></pre>
+              </figure>
+
+              <div class="callout key"><div class="callout-title">Key concept</div><div class="callout-body">The mock generator and this regression form a closed loop the tests exploit: plant a known slope (e.g. 0.03 °C/yr), generate 30 years of data, regress, and assert the recovered slope matches within <code>atol=0.01</code> (<code class="fileref" data-path="tests/test_mock_data.py:25">tests/test_mock_data.py:25</code>). This is the reference-value validation the project mandates.</div></div>
+
+              <h3 class="anchor">4 · Decade averages</h3>
+              <p>For the summary, years are floored to decades (<code>(year // 10) * 10</code>) and anomalies averaged per decade — the basis for the planned decade bar chart.</p>
+              <figure class="code">
+                <figcaption>weather_trend.py:361 · decade grouping</figcaption>
+                <pre><code>yearly_avg["decade"] = (yearly_avg.index // 10) * 10
+decade_avg = yearly_avg.groupby("decade").agg({"temperature_2m_mean": "mean"}).reset_index()</code></pre>
+              </figure>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="interfaces">
+          <details>
+            <summary><span class="sec-num">9</span><h2>Interfaces — classes &amp; functions</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">This is a library/CLI, not a web service — so the "API" is the public Python surface plus the (planned) command line.</p>
+
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Symbol</th><th>Defined in</th><th>Signature / purpose</th></tr></thead>
+                <tbody>
+                  <tr><td><code>WeatherDataFetcher</code></td><td><code class="fileref" data-path="src/fetcher.py">src/fetcher.py</code></td><td><code>__init__(client=None, sleep=time.sleep)</code>; <code>fetch_location(loc, start, end) → DataFrame</code>; <code>fetch_all(locs, start, end) → DataFrame</code>; <code>close()</code>.</td></tr>
+                  <tr><td><code>RateLimitExceededError</code></td><td><code class="fileref" data-path="src/fetcher.py:26">src/fetcher.py:26</code></td><td>Raised on Open-Meteo rate-limit body markers.</td></tr>
+                  <tr><td><code>WeatherFetchError</code></td><td><code class="fileref" data-path="src/fetcher.py:30">src/fetcher.py:30</code></td><td>Raised after retries exhausted or missing <code>daily</code> block.</td></tr>
+                  <tr><td><code>MockDataGenerator</code></td><td><code class="fileref" data-path="src/mock_data.py">src/mock_data.py</code></td><td><code>__init__(start_date, end_date, freq, trend_c_per_year, residual_loc_std, daily_noise_std, ar1_phi, missing_rate, seed)</code>; <code>generate(locations) → DataFrame</code>.</td></tr>
+                  <tr><td><code>Location / DailyTemperatureRecord / YearlyAnomaly / TrendResult</code></td><td><code class="fileref dir" data-path="src/models/">src/models/</code></td><td>Pydantic v2 models; importable from <code>src.models</code>.</td></tr>
+                  <tr><td><code>LOCATIONS</code> + constants</td><td><code class="fileref" data-path="src/config.py">src/config.py</code></td><td>Module-level config surface.</td></tr>
+                </tbody>
+              </table></div>
+
+              <h3 class="anchor">Planned CLI</h3>
+              <p>The Docker <code>CMD</code> and README both invoke <code>python -m src.cli</code>. That module does not exist yet; it will own argparse (date range, city subset, output dir, mock toggle) and orchestrate fetch → analyze → visualize.</p>
+              <div class="callout warn"><div class="callout-title">Watch out</div><div class="callout-body">Until <code>src/cli.py</code> exists, <code>uv run python -m src.cli</code> (and therefore <code>docker compose up</code>) will fail with <em>No module named src.cli</em>. To run the analysis today, use the legacy <code class="fileref" data-path="weather_trend.py">python weather_trend.py</code>.</div></div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="config-env">
+          <details>
+            <summary><span class="sec-num">10</span><h2>Configuration &amp; environment</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">Configuration is code-first (constants in <code>config.py</code>) with a single environment override for the output directory.</p>
+
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Variable / constant</th><th>Default</th><th>Where</th><th>Meaning</th></tr></thead>
+                <tbody>
+                  <tr><td><code>OUTPUT_DIR</code> (env)</td><td><code>output</code></td><td><code class="fileref" data-path="src/config.py:19">src/config.py:19</code></td><td>Chart output directory; compose sets it to <code>/app/output</code>.</td></tr>
+                  <tr><td><code>WEATHER_TRENDS_PORT</code></td><td><code>8501</code></td><td><code class="fileref" data-path="CLAUDE.md">CLAUDE.md</code> §11</td><td>Documented forward-compat stub for the Phase-2 Streamlit port. Unused in Phase 1.</td></tr>
+                  <tr><td><code>API_BASE_URL</code></td><td>archive-api.open-meteo.com/v1/archive</td><td><code class="fileref" data-path="src/config.py:8">src/config.py:8</code></td><td>Open-Meteo Archive endpoint (no API key needed).</td></tr>
+                  <tr><td><code>DEFAULT_START_DATE</code> / <code>DEFAULT_END_DATE</code></td><td><code>1940-01-01</code> / <code>2025-12-31</code></td><td><code class="fileref" data-path="src/config.py:12">src/config.py:12</code></td><td>Analysis window.</td></tr>
+                  <tr><td><code>MAX_RETRIES</code></td><td><code>3</code></td><td><code class="fileref" data-path="src/config.py:16">src/config.py:16</code></td><td>Per-location fetch attempts before giving up.</td></tr>
+                  <tr><td><code>RATE_LIMIT_BACKOFF_SECONDS</code></td><td><code>60</code></td><td><code class="fileref" data-path="src/config.py:15">src/config.py:15</code></td><td>Sleep between retries.</td></tr>
+                  <tr><td><code>HTTP_TIMEOUT_SECONDS</code></td><td><code>30</code></td><td><code class="fileref" data-path="src/config.py:17">src/config.py:17</code></td><td>httpx client timeout.</td></tr>
+                  <tr><td><code>CHART_DPI</code></td><td><code>300</code></td><td><code class="fileref" data-path="src/config.py:21">src/config.py:21</code></td><td>Publication-quality PNG resolution.</td></tr>
+                </tbody>
+              </table></div>
+
+              <div class="callout note"><div class="callout-title">Note</div><div class="callout-body">No <code>.env</code> or <code>.env.example</code> is committed; both are gitignored (<code class="fileref" data-path=".gitignore">.gitignore</code>). The only env var the code reads today is <code>OUTPUT_DIR</code>. The compose file sets it via the <code>environment:</code> block in <code class="fileref" data-path="docker-compose.yml">docker-compose.yml</code>.</div></div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="run">
+          <details>
+            <summary><span class="sec-num">11</span><h2>How to run it</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">Three ways: the launcher scripts (Docker), raw Docker Compose, or local uv. Today the legacy script is the only path that completes end-to-end.</p>
+
+              <h3 class="anchor">Local (works today)</h3>
+              <ol class="steps">
+                <li>Install deps: <code>uv sync</code> (resolves from <code class="fileref" data-path="pyproject.toml">pyproject.toml</code> + <code class="fileref" data-path="uv.lock">uv.lock</code>).</li>
+                <li>Run the working prototype: <code>uv run python weather_trend.py</code>. It fetches (or falls back to mock) and opens an interactive matplotlib window.</li>
+                <li>Run tests: <code>uv run pytest --cov=src --cov-report=term-missing</code>.</li>
+                <li>Lint: <code>uv run ruff check .</code>.</li>
+              </ol>
+
+              <h3 class="anchor">Local (target, once cli.py exists)</h3>
+              <ol class="steps">
+                <li><code>uv sync</code></li>
+                <li><code>uv run python -m src.cli</code> — will write PNGs to the runtime-created <code>output/</code> directory (per <code class="fileref" data-path="src/config.py:19">src/config.py:19</code>).</li>
+              </ol>
+
+              <h3 class="anchor">Docker</h3>
+              <ol class="steps">
+                <li>macOS/Linux: <code class="fileref" data-path="run_weather_trends.sh">./run_weather_trends.sh</code> · Windows: <code class="fileref" data-path="run_weather_trends.bat">run_weather_trends.bat</code>.</li>
+                <li>The launcher runs <code>docker compose up --build -d</code> and drops into a menu loop.</li>
+                <li>Charts land in the bind-mounted <code>output/</code> directory on the host (created at runtime; mapped in <code class="fileref" data-path="docker-compose.yml">docker-compose.yml</code>).</li>
+              </ol>
+
+              <h3 class="anchor">Launcher menu</h3>
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Key</th><th>Action</th></tr></thead>
+                <tbody>
+                  <tr><td><code>k</code></td><td>Stop containers, keep image. Terminal.</td></tr>
+                  <tr><td><code>q</code></td><td>Stop + remove project images. Terminal.</td></tr>
+                  <tr><td><code>v</code></td><td>Stop + remove images + volumes. Terminal.</td></tr>
+                  <tr><td><code>r</code></td><td>Full restart: down, remove images, rebuild, relaunch. Non-terminal.</td></tr>
+                </tbody>
+              </table></div>
+
+              <div class="callout danger"><div class="callout-title">Do not</div><div class="callout-body">Expect the container to produce charts today — its <code>CMD</code> targets the not-yet-written <code>src.cli</code> and will exit with an import error. The container build itself succeeds.</div></div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="editing">
+          <details>
+            <summary><span class="sec-num">12</span><h2>How to edit &amp; extend it</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">Concrete, owner-focused recipes. The dominant near-term task is finishing the refactor; after that, adding cities/charts is trivial.</p>
+
+              <details class="sub">
+                <summary>Finish the refactor (the next real task)</summary>
+                <div class="sub-body">
+                  <ol class="steps">
+                    <li>Create a new <code>src/analyzer.py</code> with a <code>TrendAnalyzer</code> that takes the canonical DataFrame and returns a yearly anomaly frame + a <code>TrendResult</code>. Lift the logic from <code class="fileref" data-path="weather_trend.py:209">weather_trend.py:209-297</code>; drop the polyfit fallback (scipy is a hard dep).</li>
+                    <li>Create a new <code>src/visualizer.py</code> with a <code>TrendVisualizer</code> that <code>savefig</code>s to <code>config.OUTPUT_DIR</code> at <code>CHART_DPI</code> — never <code>plt.show()</code>. Add the four chart types from <code class="fileref" data-path="CLAUDE.md">CLAUDE.md</code> §9.</li>
+                    <li>Create a new <code>src/cli.py</code> (argparse) orchestrating fetch→analyze→visualize, with a mock fallback on <code>RateLimitExceededError</code>.</li>
+                    <li>Add new <code>tests/test_analyzer.py</code> and <code>tests/test_visualizer.py</code> (use the <code>Agg</code> backend; assert files written). Keep coverage at 100%.</li>
+                    <li>Delete <code class="fileref" data-path="weather_trend.py">weather_trend.py</code> once parity is confirmed, and remove <code>requests</code> from the environment.</li>
+                  </ol>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Add or change a city</summary>
+                <div class="sub-body">
+                  <p>Edit only <code class="fileref" data-path="src/config.py:23">src/config.py:23</code> — append a <code>Location(name=..., lat=..., lon=...)</code>. Validation (bounds, names) is automatic via the model. Update <code class="fileref" data-path="tests/test_config.py">tests/test_config.py</code> if you change the count assertion (<code>== 12</code>).</p>
+                  <div class="callout tip"><div class="callout-title">Tip</div><div class="callout-body">Coordinates live <em>only</em> here. The <code>data-driven-check</code> skill (<code class="fileref" data-path=".agents/skills/data-driven-check/SKILL.md">.agents/skills/data-driven-check/SKILL.md</code>) will flag any latitude-looking float that creeps into analysis code.</div></div>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Add a new chart type</summary>
+                <div class="sub-body">
+                  <p>Once <code>visualizer.py</code> exists, add a method there and a corresponding test. Keep chart code isolated in the visualizer — never couple analysis to matplotlib. Use <code>seaborn</code> styling (<code>whitegrid</code>/<code>ticks</code>) per the standards, label axes with units, save at <code>CHART_DPI</code>.</p>
+                </div>
+              </details>
+
+              <details class="sub">
+                <summary>Tune the mock generator</summary>
+                <div class="sub-body">
+                  <p>All knobs are <code>MockDataGenerator.__init__</code> args (trend, noise, AR(1) phi, missing rate, seed). Named magnitudes (baseline, amplitude) are constants at the top of <code class="fileref" data-path="src/mock_data.py:10">src/mock_data.py:10</code>. If you touch the seasonal term, re-run <code>test_hemisphere_seasonality_opposite_phase</code> and <code>test_trend_signal_is_recoverable</code> — both are sensitive to seasonal/time orthogonality.</p>
+                </div>
+              </details>
+
+              <div class="callout key"><div class="callout-title">Key concept</div><div class="callout-body">The golden rule for any extension: a new data source must still emit the five-column DataFrame, and any new computed quantity should be expressed as a Pydantic model in its own file under <code class="fileref dir" data-path="src/models/">src/models/</code>. One concept per file is enforced project-wide.</div></div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="testing">
+          <details>
+            <summary><span class="sec-num">13</span><h2>Testing</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">pytest with a hard 100% coverage gate. Real math, mocked I/O, reference-value assertions.</p>
+
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>File</th><th>Covers</th><th>Notable tests</th></tr></thead>
+                <tbody>
+                  <tr><td><code class="fileref" data-path="tests/test_config.py">test_config.py</code></td><td>config invariants</td><td>12 unique cities, URL, date range, retry/DPI sanity.</td></tr>
+                  <tr><td><code class="fileref" data-path="tests/test_fetcher.py">test_fetcher.py</code></td><td>fetcher</td><td>Success, param encoding, rate-limit (parametrized), transient-then-success, persistent failure, client ownership.</td></tr>
+                  <tr><td><code class="fileref" data-path="tests/test_mock_data.py">test_mock_data.py</code></td><td>mock generator</td><td>Trend recoverability (<code>assert_allclose atol=0.01</code>), hemisphere phase, seed reproducibility, missing-rate, AR(1) seeding.</td></tr>
+                  <tr><td><code class="fileref" data-path="tests/test_models.py">test_models.py</code></td><td>Pydantic models</td><td>Bounds rejection, empty names, null temps, out-of-range stats.</td></tr>
+                </tbody>
+              </table></div>
+
+              <h3 class="anchor">How tests mock the API</h3>
+              <p>No network in tests. <code class="fileref" data-path="tests/test_fetcher.py:19">tests/test_fetcher.py:19</code> builds the fetcher with an <code>httpx.MockTransport</code> and a no-op <code>sleep</code>, so retries are instant and responses are scripted per request.</p>
+
+              <h3 class="anchor">Rules (from the validation-protocol skill)</h3>
+              <dl class="doc-dl">
+                <dt>No mocking of math</dt><dd>Never mock <code>linregress</code>, numpy, or pandas aggregations. Only HTTP/filesystem I/O is mocked.</dd>
+                <dt>Reference values</dt><dd>At least one test per analysis module compares against an independently known result (e.g. planted slope).</dd>
+                <dt>Float comparisons</dt><dd>Always <code>np.testing.assert_allclose</code> with a documented tolerance — never <code>==</code>.</dd>
+              </dl>
+              <p>Full protocol: <code class="fileref" data-path=".agents/skills/validation-protocol/SKILL.md">.agents/skills/validation-protocol/SKILL.md</code>.</p>
+
+              <div class="callout warn"><div class="callout-title">Watch out</div><div class="callout-body">Coverage source is <code>src/</code> only (<code class="fileref" data-path="pyproject.toml">pyproject.toml</code> <code>[tool.coverage.run]</code>); <code>weather_trend.py</code> is excluded, so the legacy file is intentionally untested. Once <code>analyzer/visualizer/cli</code> land, they must hit 100% or CI fails.</div></div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="ci-cd">
+          <details>
+            <summary><span class="sec-num">14</span><h2>Build, CI &amp; release</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">CI runs on GitHub Actions (the doc text says GitLab; the actual implementation is GitHub). A separate manual workflow handles version bumps.</p>
+
+              <h3 class="anchor">CI pipeline</h3>
+              <div class="flow"><span class="node">lint</span><span class="arrow">→</span><span class="node">test</span><span class="arrow">→</span><span class="node">build</span><span class="arrow">→</span><span class="node">docker-build</span></div>
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Job</th><th>Command</th><th>Gate</th></tr></thead>
+                <tbody>
+                  <tr><td>lint</td><td><code>uv run ruff check .</code></td><td>Any error fails.</td></tr>
+                  <tr><td>test</td><td><code>uv run pytest --cov=src --cov-fail-under=100 ...</code></td><td>Coverage &lt; 100% fails.</td></tr>
+                  <tr><td>build</td><td><code>uv build</code> + upload <code>dist/</code> artifact</td><td>Must compile.</td></tr>
+                  <tr><td>docker-build</td><td>buildx build (no push)</td><td>Only on <code>main</code>/<code>staging</code>.</td></tr>
+                </tbody>
+              </table></div>
+              <p>Defined in <code class="fileref" data-path=".github/workflows/ci.yml">.github/workflows/ci.yml</code>. Jobs chain via <code>needs:</code>, with concurrency cancellation per ref.</p>
+
+              <h3 class="anchor">Release</h3>
+              <p><code class="fileref" data-path=".github/workflows/release.yml">.github/workflows/release.yml</code> is a manual <code>workflow_dispatch</code> with a <code>bump</code> choice (patch/minor/major). It runs <code>uv version --bump</code>, commits <code>pyproject.toml</code> (+ <code>uv.lock</code>), tags <code>vX.Y.Z</code>, and pushes — only from <code>main</code>.</p>
+
+              <div class="callout warn"><div class="callout-title">Watch out</div><div class="callout-body">Two inconsistencies with the written guidelines: (1) the project uses <strong>GitHub Actions, not GitLab CI</strong> — there is no <code>.gitlab-ci.yml</code>; (2) CLAUDE.md says "do not edit pyproject version directly," but the release workflow does exactly that via <code>uv version --bump</code> (which is the intended automation, so this is fine — just don't hand-edit the field).</div></div>
+
+              <h3 class="anchor">Docker image</h3>
+              <p><code class="fileref" data-path="Dockerfile">Dockerfile</code>: <code>python:3.13-slim</code> → <code>pip install uv</code> → copy <code>pyproject.toml</code> → <code>uv sync --no-dev</code> → copy <code>src/</code> + <code>weather_trend.py</code> → <code>mkdir output</code> → <code>CMD ["uv","run","python","-m","src.cli"]</code>. <code class="fileref" data-path="docker-compose.yml">docker-compose.yml</code> is a single service with <code>restart: "no"</code> (it runs and exits) and the <code>output/</code> bind mount.</p>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="roadmap">
+          <details>
+            <summary><span class="sec-num">15</span><h2>Roadmap &amp; phases</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">Three phases. Phase 1 (this) is a CLI tool; Phase 2 a Streamlit dashboard; Phase 3 a FastAPI + Postgres pipeline. Full detail in <code class="fileref" data-path="docs/WEATHER_TRENDS_MASTER_PLAN.md">docs/WEATHER_TRENDS_MASTER_PLAN.md</code>.</p>
+
+              <figure class="diagram">
+                <div class="mermaid">
+gantt
+    title Weather Trends phases
+    dateFormat YYYY-MM-DD
+    section Phase 1 CLI
+        Module refactor        :active, p1a, 2026-04-13, 14d
+        Tests + 100pct cov     :p1b, after p1a, 5d
+        Dockerize + CI         :done, p1c, 2026-04-13, 4d
+    section Phase 2 Streamlit
+        Dashboard              :p2a, after p1b, 14d
+        Filtering + ranges     :p2b, after p2a, 7d
+    section Phase 3 API
+        FastAPI + Postgres     :p3a, after p2b, 14d
+        Scheduled collection   :p3b, after p3a, 7d
+                </div>
+                <div class="mermaid-fallback"><figure class="code"><figcaption>diagram source · mermaid</figcaption><pre><code>gantt
+    title Weather Trends phases
+    dateFormat YYYY-MM-DD
+    section Phase 1 CLI
+        Module refactor        :active, p1a, 2026-04-13, 14d
+        Tests + 100pct cov     :p1b, after p1a, 5d
+        Dockerize + CI         :done, p1c, 2026-04-13, 4d
+    section Phase 2 Streamlit
+        Dashboard              :p2a, after p1b, 14d
+        Filtering + ranges     :p2b, after p2a, 7d
+    section Phase 3 API
+        FastAPI + Postgres     :p3a, after p2b, 14d
+        Scheduled collection   :p3b, after p3a, 7d</code></pre></figure></div>
+                <figcaption>Phase timeline. Infra (Docker/CI) landed early; the module refactor is the active blocker.</figcaption>
+              </figure>
+
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>Phase</th><th>Delivers</th><th>Adds to stack</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td>1 · CLI</td><td>Typed module pipeline, PNG charts, tests, Docker, CI</td><td>—</td><td>Active (refactor mid-flight)</td></tr>
+                  <tr><td>2 · Streamlit</td><td>Interactive dashboard, city/date filters, comparison view</td><td>Streamlit, healthcheck</td><td>Planned</td></tr>
+                  <tr><td>3 · FastAPI</td><td>REST API, persistent storage, scheduled collection</td><td>FastAPI, SQLAlchemy 2.0 async, Postgres 16, Redis, APScheduler</td><td>Planned</td></tr>
+                </tbody>
+              </table></div>
+
+              <h3 class="anchor">Phase-1 gate criteria</h3>
+              <p>Per the master plan: <code>ruff check .</code> clean; <code>pytest --cov</code> at 100%; <code>docker compose up --build</code> produces charts in <code>output/</code>; at least one test validates slope against synthetic data; all charts saved as 300 DPI PNGs. The middle items (cli/visualizer producing PNGs) are the outstanding work.</p>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="agents">
+          <details>
+            <summary><span class="sec-num">16</span><h2>Agent &amp; automation wiring</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">This repo is built to be edited by AI agents under guardrails. The wiring lives under <code>.agents/</code>, <code>.codex/</code>, and <code>scripts/hooks/</code>.</p>
+
+              <div class="filelist">
+                <div class="filecard"><code class="fileref" data-path=".agents/skills/data-driven-check/SKILL.md">data-driven-check</code><span class="filecard-desc">Flags hard-coded coordinates, URLs, dates, and magic numbers in <code>src/</code>.</span></div>
+                <div class="filecard"><code class="fileref" data-path=".agents/skills/phase-awareness/SKILL.md">phase-awareness</code><span class="filecard-desc">Blocks out-of-phase work (no Streamlit/FastAPI/DB in Phase 1).</span></div>
+                <div class="filecard"><code class="fileref" data-path=".agents/skills/validation-protocol/SKILL.md">validation-protocol</code><span class="filecard-desc">Enforces real-math tests, reference values, <code>assert_allclose</code>.</span></div>
+                <div class="filecard"><code class="fileref dir" data-path=".codex/commands/">.codex/commands/</code><span class="filecard-desc">Slash commands: scaffold, review, validate, pre-commit.</span></div>
+                <div class="filecard"><code class="fileref" data-path=".codex/hooks.json">.codex/hooks.json</code><span class="filecard-desc">Wires Node hooks to Write/Edit and Stop events.</span></div>
+                <div class="filecard"><code class="fileref dir" data-path="scripts/hooks/">scripts/hooks/</code><span class="filecard-desc"><code>pre-tool-use</code>, <code>post-tool-use</code>, <code>stop</code>, <code>stop-memory</code> (OS-agnostic <code>.cjs</code>, per the global convention).</span></div>
+              </div>
+
+              <div class="callout note"><div class="callout-title">Note</div><div class="callout-body">Hooks are Node <code>.cjs</code> invoked via <code>node -e require(...)</code> rather than bash/jq/python, so they run identically on Windows and macOS. <code class="fileref" data-path="CLAUDE.md">CLAUDE.md</code> and <code class="fileref" data-path="AGENTS.md">AGENTS.md</code> are near-duplicate guideline files for Claude and other agents respectively.</div></div>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="glossary">
+          <details>
+            <summary><span class="sec-num">17</span><h2>Domain glossary</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">Terms a newcomer needs to read the code and the charts.</p>
+              <dl class="doc-dl">
+                <dt>Anomaly</dt><dd>A temperature expressed relative to a baseline (here, each city's long-run mean), not an absolute value. The core quantity analyzed.</dd>
+                <dt>Baseline</dt><dd>A location's mean temperature across all years; subtracted to form anomalies.</dd>
+                <dt>temperature_2m_mean</dt><dd>Open-Meteo's daily mean air temperature at 2 m above ground, in °C — the only variable fetched.</dd>
+                <dt>Slope (°C/year)</dt><dd>The warming rate from the linear regression of yearly mean anomaly on year.</dd>
+                <dt>p-value</dt><dd>Probability the observed slope arose by chance under a no-trend null; small ⇒ significant warming.</dd>
+                <dt>R²</dt><dd>Fraction of year-to-year anomaly variance explained by the linear trend.</dd>
+                <dt>CI95 / SE</dt><dd>95% confidence half-width (<code>1.96·SE</code>) and standard error (<code>std/√n</code>) of the cross-city mean anomaly.</dd>
+                <dt>AR(1)</dt><dd>First-order autoregression: today's noise depends partly on yesterday's, modeling weather persistence in the mock data.</dd>
+                <dt>frac_year</dt><dd>Year plus fractional day-of-year (<code>year + (doy-1)/365.25</code>), the continuous time axis for the planted trend.</dd>
+                <dt>Open-Meteo Archive API</dt><dd>Free, key-less historical weather endpoint; the project's sole real data source.</dd>
+              </dl>
+            </div>
+          </details>
+        </section>
+
+        <section class="doc-section" id="file-index">
+          <details>
+            <summary><span class="sec-num">18</span><h2>Key files index</h2><span class="chevron"></span></summary>
+            <div class="sec-body">
+              <p class="lead-in">One-line jump-off map to everything that matters.</p>
+              <div class="table-wrap"><table class="doc-table">
+                <thead><tr><th>File</th><th>What it's for</th></tr></thead>
+                <tbody>
+                  <tr><td><code class="fileref" data-path="weather_trend.py">weather_trend.py</code></td><td>Working legacy prototype; the only end-to-end runnable path today.</td></tr>
+                  <tr><td><code class="fileref" data-path="src/config.py">src/config.py</code></td><td>All constants + the 12-city <code>LOCATIONS</code> list.</td></tr>
+                  <tr><td><code class="fileref" data-path="src/fetcher.py">src/fetcher.py</code></td><td>httpx fetcher with bounded retry and rate-limit detection.</td></tr>
+                  <tr><td><code class="fileref" data-path="src/mock_data.py">src/mock_data.py</code></td><td>Deterministic synthetic temperature generator.</td></tr>
+                  <tr><td><code class="fileref dir" data-path="src/models/">src/models/</code></td><td>Four Pydantic v2 data contracts.</td></tr>
+                  <tr><td><code class="fileref dir" data-path="tests/">tests/</code></td><td>pytest suite (config, fetcher, mock_data, models).</td></tr>
+                  <tr><td><code class="fileref" data-path="docs/WEATHER_TRENDS_MASTER_PLAN.md">docs/WEATHER_TRENDS_MASTER_PLAN.md</code></td><td>Authoritative plan: phases, data flow, choices, city table.</td></tr>
+                  <tr><td><code class="fileref" data-path="docs/status.md">docs/status.md</code></td><td>Live refactor state.</td></tr>
+                  <tr><td><code class="fileref" data-path="docs/versions.md">docs/versions.md</code></td><td>Semver changelog (currently behind pyproject).</td></tr>
+                  <tr><td><code class="fileref" data-path="pyproject.toml">pyproject.toml</code></td><td>Deps, build, pytest, coverage, ruff; version source of truth (0.2.0).</td></tr>
+                  <tr><td><code class="fileref" data-path="Dockerfile">Dockerfile</code></td><td>python:3.13-slim image; CMD targets <code>src.cli</code>.</td></tr>
+                  <tr><td><code class="fileref" data-path="docker-compose.yml">docker-compose.yml</code></td><td>Single service; bind-mounts <code>output/</code>.</td></tr>
+                  <tr><td><code class="fileref" data-path=".github/workflows/ci.yml">.github/workflows/ci.yml</code></td><td>lint → test → build → docker-build.</td></tr>
+                  <tr><td><code class="fileref" data-path=".github/workflows/release.yml">.github/workflows/release.yml</code></td><td>Manual semver bump + tag.</td></tr>
+                  <tr><td><code class="fileref" data-path="run_weather_trends.sh">run_weather_trends.sh</code> / <code class="fileref" data-path="run_weather_trends.bat">.bat</code></td><td>Docker launchers with k/q/v/r menu.</td></tr>
+                  <tr><td><code class="fileref" data-path="CLAUDE.md">CLAUDE.md</code> / <code class="fileref" data-path="AGENTS.md">AGENTS.md</code></td><td>AI/dev guidelines (near-identical).</td></tr>
+                </tbody>
+              </table></div>
+            </div>
+          </details>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <button id="backTop" title="Back to top"><span class="ico"></span></button>
+
+  <footer class="doc-footer">
+    <p>Human-facing documentation for <strong>weather-trends</strong> · generated 2026-06-07.
+    Styling and behavior are inlined directly into this file — it is fully self-contained and needs no external assets. Re-open after editing source to keep this guide in sync.</p>
+  </footer>
+
+  <script>
+/* ============================================================================
+   doc.js — Shared behavior for every project's PROJECT_DOCUMENTATION.html.
+   Inlined directly into this PROJECT_DOCUMENTATION.html (self-contained; no external script).
+   Responsibilities:
+     - theme (light/dark) with persistence
+     - auto-built table of contents from <section class="doc-section"> + h3 anchors
+     - scroll-spy active highlighting
+     - live full-text section filter (search box)
+     - expand-all / collapse-all
+     - click-to-copy file references and code blocks
+     - scroll progress bar + back-to-top
+     - mermaid diagram rendering (CDN) with graceful source fallback
+     - print = expand everything
+   No build step, no framework. Pure DOM.
+   ============================================================================ */
+(function () {
+  "use strict";
+
+  var THEME_KEY = "projDocTheme";
+
+  /* ---- theme (apply ASAP to avoid flash) ---- */
+  function preferredTheme() {
+    var saved = null;
+    try { saved = localStorage.getItem(THEME_KEY); } catch (e) {}
+    if (saved === "light" || saved === "dark") return saved;
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+  function applyTheme(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    var btn = document.getElementById("themeToggle");
+    if (btn) {
+      var ico = btn.querySelector(".ico");
+      if (ico) ico.style.webkitMaskImage = ico.style.maskImage = "var(--icon-" + (t === "dark" ? "sun" : "moon") + ")";
+      btn.setAttribute("aria-label", t === "dark" ? "Switch to light theme" : "Switch to dark theme");
+    }
+  }
+  applyTheme(preferredTheme());
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+
+  function init() {
+    applyTheme(preferredTheme());
+    buildTOC();
+    wireControls();
+    wireFileRefs();
+    wireCodeCopy();
+    wireScrollProgress();
+    wireBackToTop();
+    wireScrollSpy();
+    wirePrint();
+    initMermaid();
+    handleInitialHash();
+  }
+
+  /* ---- slugify ---- */
+  function slug(s) {
+    return s.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").slice(0, 60);
+  }
+
+  /* ---- TOC ---- */
+  function buildTOC() {
+    var toc = document.getElementById("docToc");
+    if (!toc) return;
+    var sections = Array.prototype.slice.call(document.querySelectorAll("main .doc-section"));
+    if (!sections.length) return;
+    var ul = document.createElement("ul");
+    var n = 0;
+    sections.forEach(function (sec) {
+      n++;
+      if (!sec.id) sec.id = "sec-" + n;
+      var h2 = sec.querySelector("summary h2");
+      var title = h2 ? h2.textContent.trim() : ("Section " + n);
+      var li = document.createElement("li");
+      var a = document.createElement("a");
+      a.href = "#" + sec.id;
+      a.dataset.target = sec.id;
+      a.innerHTML = '<span class="toc-num">' + n + "</span>" + escapeHTML(title);
+      li.appendChild(a);
+      ul.appendChild(li);
+
+      // nested h3 anchors marked with class "anchor"
+      var subs = sec.querySelectorAll("h3.anchor");
+      Array.prototype.forEach.call(subs, function (h3) {
+        if (!h3.id) h3.id = sec.id + "-" + slug(h3.textContent);
+        var sli = document.createElement("li");
+        var sa = document.createElement("a");
+        sa.href = "#" + h3.id;
+        sa.className = "sub";
+        sa.dataset.target = h3.id;
+        sa.textContent = h3.textContent.trim();
+        sli.appendChild(sa);
+        ul.appendChild(sli);
+      });
+    });
+    toc.appendChild(ul);
+
+    // smooth scroll with header offset, and open target section
+    toc.addEventListener("click", function (e) {
+      var a = e.target.closest("a");
+      if (!a) return;
+      e.preventDefault();
+      var id = a.dataset.target;
+      revealAndScroll(id);
+      history.replaceState(null, "", "#" + id);
+    });
+  }
+
+  function revealAndScroll(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    // open the enclosing section + any parent <details>
+    var d = el.closest("details");
+    while (d) { d.open = true; d = d.parentElement ? d.parentElement.closest("details") : null; }
+    var sec = el.closest(".doc-section") || el;
+    if (sec.querySelector) {
+      var det = sec.querySelector(":scope > details");
+      if (det) det.open = true;
+    }
+    setTimeout(function () {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 30);
+  }
+
+  /* ---- controls (expand/collapse/theme/print/search) ---- */
+  function wireControls() {
+    var expand = document.getElementById("expandAll");
+    var collapse = document.getElementById("collapseAll");
+    var theme = document.getElementById("themeToggle");
+    var print = document.getElementById("printBtn");
+    var search = document.getElementById("docSearch");
+
+    if (expand) expand.addEventListener("click", function () { allDetails().forEach(function (d) { d.open = true; }); });
+    if (collapse) collapse.addEventListener("click", function () {
+      document.querySelectorAll("main .doc-section > details").forEach(function (d) { d.open = false; });
+      document.querySelectorAll("main details.sub").forEach(function (d) { d.open = false; });
+    });
+    if (theme) theme.addEventListener("click", function () {
+      var cur = document.documentElement.getAttribute("data-theme");
+      var next = cur === "dark" ? "light" : "dark";
+      try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+      applyTheme(next);
+    });
+    if (print) print.addEventListener("click", function () { window.print(); });
+    if (search) wireSearch(search);
+  }
+
+  function allDetails() { return Array.prototype.slice.call(document.querySelectorAll("main details")); }
+
+  /* ---- search / filter ---- */
+  function wireSearch(input) {
+    var countEl = document.querySelector(".search-count");
+    var sections = Array.prototype.slice.call(document.querySelectorAll("main .doc-section"));
+    var tocLinks = Array.prototype.slice.call(document.querySelectorAll("#docToc a"));
+    var debounce;
+    input.addEventListener("input", function () {
+      clearTimeout(debounce);
+      debounce = setTimeout(run, 120);
+    });
+    input.addEventListener("keydown", function (e) { if (e.key === "Escape") { input.value = ""; run(); input.blur(); } });
+
+    function run() {
+      var q = input.value.trim().toLowerCase();
+      var shown = 0;
+      if (!q) {
+        sections.forEach(function (s) { s.classList.remove("filtered-out"); });
+        tocLinks.forEach(function (a) { a.classList.remove("filtered-out"); });
+        if (countEl) countEl.textContent = "";
+        return;
+      }
+      sections.forEach(function (s) {
+        var match = s.textContent.toLowerCase().indexOf(q) !== -1;
+        s.classList.toggle("filtered-out", !match);
+        if (match) {
+          shown++;
+          var det = s.querySelector(":scope > details");
+          if (det) det.open = true;
+        }
+        var link = document.querySelector('#docToc a[data-target="' + s.id + '"]');
+        if (link) link.classList.toggle("filtered-out", !match);
+      });
+      if (countEl) countEl.textContent = shown + (shown === 1 ? " match" : " matches");
+    }
+  }
+
+  /* ---- file references: click to copy path ---- */
+  function wireFileRefs() {
+    document.body.addEventListener("click", function (e) {
+      var ref = e.target.closest("code.fileref");
+      if (!ref) return;
+      var path = ref.getAttribute("data-path") || ref.textContent.trim();
+      copyText(path).then(function () {
+        var old = ref.textContent;
+        ref.classList.add("copied");
+        ref.textContent = "copied: " + path;
+        setTimeout(function () { ref.textContent = old; ref.classList.remove("copied"); }, 1100);
+      });
+    });
+  }
+
+  /* ---- code blocks: copy button ---- */
+  function wireCodeCopy() {
+    document.querySelectorAll("figure.code").forEach(function (fig) {
+      var pre = fig.querySelector("pre");
+      if (!pre) return;
+      var btn = document.createElement("button");
+      btn.className = "btn code-copy";
+      btn.innerHTML = '<span class="ico" style="-webkit-mask:var(--icon-copy) center/contain no-repeat;mask:var(--icon-copy) center/contain no-repeat"></span><span class="label">Copy</span>';
+      btn.addEventListener("click", function () {
+        copyText(pre.innerText).then(function () {
+          var l = btn.querySelector(".label");
+          if (l) { l.textContent = "Copied"; setTimeout(function () { l.textContent = "Copy"; }, 1100); }
+        });
+      });
+      fig.appendChild(btn);
+    });
+  }
+
+  function copyText(t) {
+    if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(t).catch(fallback);
+    return fallback();
+    function fallback() {
+      try {
+        var ta = document.createElement("textarea");
+        ta.value = t; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select(); document.execCommand("copy");
+        document.body.removeChild(ta);
+      } catch (e) {}
+      return Promise.resolve();
+    }
+  }
+
+  /* ---- scroll progress ---- */
+  function wireScrollProgress() {
+    var bar = document.getElementById("scrollProgress");
+    if (!bar) return;
+    function upd() {
+      var h = document.documentElement;
+      var max = h.scrollHeight - h.clientHeight;
+      var pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
+      bar.style.width = pct + "%";
+    }
+    window.addEventListener("scroll", upd, { passive: true });
+    window.addEventListener("resize", upd);
+    upd();
+  }
+
+  /* ---- back to top ---- */
+  function wireBackToTop() {
+    var b = document.getElementById("backTop");
+    if (!b) return;
+    b.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: "smooth" }); });
+    window.addEventListener("scroll", function () {
+      b.classList.toggle("show", window.scrollY > 600);
+    }, { passive: true });
+  }
+
+  /* ---- scroll-spy ---- */
+  function wireScrollSpy() {
+    var links = {};
+    document.querySelectorAll("#docToc a").forEach(function (a) { links[a.dataset.target] = a; });
+    var targets = Array.prototype.slice.call(document.querySelectorAll("main .doc-section, main h3.anchor"));
+    if (!targets.length || !("IntersectionObserver" in window)) return;
+    var visible = new Set();
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) visible.add(en.target.id); else visible.delete(en.target.id);
+      });
+      var best = null, bestTop = Infinity;
+      visible.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var top = el.getBoundingClientRect().top;
+        if (top < bestTop) { bestTop = top; best = id; }
+      });
+      Object.keys(links).forEach(function (id) { links[id].classList.toggle("active", id === best); });
+    }, { rootMargin: "-70px 0px -65% 0px", threshold: 0 });
+    targets.forEach(function (t) { if (t.id) obs.observe(t); });
+  }
+
+  /* ---- print = expand all ---- */
+  function wirePrint() {
+    window.addEventListener("beforeprint", function () { allDetails().forEach(function (d) { d.open = true; }); });
+  }
+
+  /* ---- initial hash ---- */
+  function handleInitialHash() {
+    if (location.hash.length > 1) {
+      var id = decodeURIComponent(location.hash.slice(1));
+      setTimeout(function () { revealAndScroll(id); }, 60);
+    }
+  }
+
+  /* ---- mermaid (CDN, graceful fallback to source) ---- */
+  function initMermaid() {
+    var blocks = document.querySelectorAll(".mermaid");
+    if (!blocks.length) return;
+    // stash source for fallback
+    blocks.forEach(function (b) { if (!b.dataset.src) b.dataset.src = b.textContent; });
+    var theme = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "default";
+    var s = document.createElement("script");
+    s.type = "module";
+    s.textContent =
+      'import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";' +
+      'mermaid.initialize({ startOnLoad: false, theme: "' + theme + '", securityLevel: "loose", flowchart:{useMaxWidth:true}, themeVariables:{ fontFamily: "inherit" } });' +
+      'try { await mermaid.run({ querySelector: ".mermaid" }); }' +
+      'catch (e) { document.querySelectorAll(".mermaid").forEach(function(b){ var f=b.closest("figure.diagram"); if(f) f.classList.add("failed"); }); }';
+    s.onerror = mermaidFail;
+    document.body.appendChild(s);
+    // safety net: if CDN blocked, reveal fallbacks after a delay
+    setTimeout(function () {
+      document.querySelectorAll(".mermaid").forEach(function (b) {
+        if (!b.querySelector("svg")) { var f = b.closest("figure.diagram"); if (f) f.classList.add("failed"); }
+      });
+    }, 4000);
+  }
+  function mermaidFail() {
+    document.querySelectorAll("figure.diagram").forEach(function (f) { f.classList.add("failed"); });
+  }
+
+  function escapeHTML(s) { var d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+})();
+
+  </script>
+</body>
+</html>

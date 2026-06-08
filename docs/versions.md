@@ -1,5 +1,29 @@
 # Versions — Weather Trends Analyzer
 
+## v0.3.0 — Analyzer / Visualizer / CLI Extraction (Refactor Complete)
+
+**Date:** 2026-06-08
+
+- Completed the Phase 1 refactor by extracting the remaining logic from the `weather_trend.py` prototype into `src/`:
+  - `src/analyzer.py` — `TrendAnalyzer` (yearly anomaly aggregation, 95% CI, `scipy.stats.linregress` trend) and the `AnalysisResult` aggregate. Drops the prototype's SciPy try/except polyfit fallback (SciPy is a hard dependency) and emits a dedicated `mean_anomaly` column instead of overloading `temperature_2m_mean`.
+  - `src/visualizer.py` — `TrendVisualizer` renders the trend (with 95% CI) and distribution to `output/temperature_trend.png` at 300 DPI on the headless Agg backend, replacing the prototype's `plt.show()`.
+  - `src/cli.py` — `python -m src.cli` entry point (fetch → analyze → visualize → summary report) with `--mock`, `--start-date`, `--end-date`, `--output-dir`; falls back to `MockDataGenerator` on `RateLimitExceededError`. This is the module the `Dockerfile` CMD already targeted.
+- Correctness fix: single-location years now report `std`/`se`/`ci95` as `0.0` instead of `NaN`, satisfying the `YearlyAnomaly` contract.
+- Added `tests/test_analyzer.py`, `tests/test_visualizer.py`, `tests/test_cli.py` (14 tests). Suite now at 56 tests, 100% coverage maintained.
+- `weather_trend.py` and the `COPY weather_trend.py .` line in the `Dockerfile` are now redundant and removable (left for manual git cleanup).
+
+## v0.2.0 — OOP Extraction: Fetcher, Config, Models (Backfilled)
+
+**Date:** 2026-04-26
+
+- Extracted the data and configuration layers from the `weather_trend.py` prototype into `src/`:
+  - `src/config.py` — `LOCATIONS` (as `Location` models), API settings, default date range, `OUTPUT_DIR`, `CHART_DPI`.
+  - `src/fetcher.py` — `WeatherDataFetcher` on httpx (replacing `requests`), with retry/backoff and `RateLimitExceededError` / `WeatherFetchError`.
+  - `src/mock_data.py` — `MockDataGenerator` class form of the synthetic-data generator.
+  - `src/models/` — Pydantic v2 contracts: `Location`, `DailyTemperatureRecord`, `YearlyAnomaly`, `TrendResult`.
+- Added the pytest suite (httpx `MockTransport` for fetcher tests) at 100% coverage, plus the Codex harness wiring and GitHub CI fixes.
+- Released as v0.2.0 (`release: v0.2.0`, 2026-04-26). Changelog entry backfilled in v0.3.0 — it had been omitted at release time.
+
 ## v0.1.1 — Mock Seasonal Phase Fix
 
 **Date:** 2026-04-16
