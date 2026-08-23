@@ -47,7 +47,7 @@ class GlobalWeatherAnalyzer:
         }
         
         try:
-            response = requests.get(self.base_url, params=params)
+            response = requests.get(self.base_url, params=params, timeout=30)
             
             # Print detailed error information
             print(f"URL: {response.url}")

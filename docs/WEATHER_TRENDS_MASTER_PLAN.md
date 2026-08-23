@@ -40,9 +40,10 @@ gantt
         Add type annotations + Pydantic    :p1b, after p1a, 3d
         Write pytest test suite            :p1c, after p1b, 5d
         Dockerize CLI tool                 :p1d, after p1c, 2d
-        GitLab CI/CD pipeline              :p1e, after p1d, 2d
+        GitHub Actions CI pipeline         :p1e, after p1d, 2d
+        Wire sast stage                    :p1f, after p1e, 1d
     section Phase 2
-        Streamlit dashboard                :p2a, after p1e, 14d
+        Streamlit dashboard                :p2a, after p1f, 14d
         Interactive city filtering         :p2b, after p2a, 7d
         Date range selection               :p2c, after p2b, 5d
     section Phase 3
@@ -65,7 +66,8 @@ gantt
 - Full type annotations, ruff-clean
 - pytest test suite at 100% coverage
 - Dockerfile + docker-compose.yml
-- `.gitlab-ci.yml` with lint → test → coverage → build → docker-build
+- `.github/workflows/ci.yml` with lint → sast → test → coverage → build → docker-build
+- Wire `sast` stage (Semgrep + `pip-audit` + `gitleaks`; ruff `S` rules in lint; Trivy in docker-build) — see section 10
 - Launcher scripts (`run_weather_trends.sh`, `run_weather_trends.bat`)
 
 **Gate criteria:**
@@ -74,6 +76,8 @@ gantt
 3. `docker compose up --build` runs the analysis and produces charts in `output/`.
 4. At least one test validates trend slope against a known synthetic dataset.
 5. All charts save to `output/` as 300 DPI PNGs.
+6. SAST stage green — zero HIGH/CRITICAL findings; MEDIUM findings triaged with written justification.
+7. New input boundaries in this phase are injection-safe and documented in `CLAUDE.md` `<security>`.
 
 ### Phase 2: Streamlit Dashboard
 
@@ -91,6 +95,8 @@ gantt
 2. All Phase 1 chart types available interactively.
 3. City filtering works correctly.
 4. Docker healthcheck passes.
+5. SAST stage green — zero HIGH/CRITICAL findings; MEDIUM findings triaged with written justification.
+6. New input boundaries in this phase are injection-safe and documented in `CLAUDE.md` `<security>`.
 
 ### Phase 3: FastAPI Backend + Scheduled Collection
 
@@ -108,6 +114,8 @@ gantt
 2. Data persists across container restarts.
 3. Scheduled collection runs without manual intervention.
 4. Full CI/CD pipeline green.
+5. SAST stage green — zero HIGH/CRITICAL findings; MEDIUM findings triaged with written justification.
+6. New input boundaries in this phase are injection-safe and documented in `CLAUDE.md` `<security>`.
 
 ---
 
@@ -161,7 +169,7 @@ graph LR
 | Lint/format | ruff | Single tool for lint + format |
 | Packaging | uv + pyproject.toml | Modern Python packaging |
 | Container | python:3.13-slim | glibc-based; scipy/numpy wheel compatibility |
-| CI/CD | GitLab CI | Standard per global rules |
+| CI/CD | GitHub Actions | Public repository — GitHub per global rules (GitLab is for private projects) |
 
 ---
 
@@ -192,3 +200,31 @@ Selected for geographic diversity (both hemispheres, multiple continents, coasta
 - **Data format** (DataFrame columns: `time`, `temperature_2m_mean`, `location`, `lat`, `lon`) is the shared contract. Phase 3 maps these columns to PostgreSQL table columns.
 - **Anomaly calculation** logic lives in `TrendAnalyzer` and must produce identical results whether data comes from API, mock generator, or database.
 - **Chart generation** code is reusable across CLI (save to file), Streamlit (render in browser), and API (return as bytes).
+
+---
+
+## 10. Security
+
+Applies global `~/.claude/CLAUDE.md` section 19. The full input-boundary table, tool versions, and local commands live in `CLAUDE.md` section 8a `<security>`; this section records the architecture-level decisions.
+
+### SAST as a mandatory pipeline stage
+- Every pipeline, from the first one committed in Phase 1 onward, has a `sast` stage between `lint` and `test`. It fails on any HIGH/CRITICAL finding; MEDIUM findings are fixed or suppressed inline with a written justification. `allow_failure: true` is non-compliant.
+- Tool set: Semgrep (`p/default`, `p/owasp-top-ten`, `p/python`, `p/docker`), ruff `S` rules in `lint` (`select = ["E", "F", "I", "N", "UP", "ANN", "S"]`), `pip-audit`, `gitleaks`, and Trivy against the built image in `docker-build`. Phase 3 adds `eslint-plugin-security` + `eslint-plugin-no-unsanitized` and `pnpm audit --audit-level=high` only if a React frontend is introduced.
+- Provider wiring follows the repository's live CI file (`.github/workflows/ci.yml`, public GitHub): CodeQL + Semgrep SARIF upload, `gitleaks/gitleaks-action`, `aquasecurity/trivy-action`, `security-events: write`.
+
+```mermaid
+graph LR
+    L[lint: ruff incl. S] --> S[sast: Semgrep + pip-audit + gitleaks]
+    S --> T[test: pytest --cov]
+    T --> C[coverage gate: 100%]
+    C --> B[build: uv build]
+    B --> D[docker-build + Trivy]
+```
+
+### Injection-safety principles per component
+- **`WeatherDataFetcher`** — the only network boundary. `API_BASE_URL` is a constant (no SSRF surface); only numeric `Location` coordinates and validated ISO dates enter query params. Responses are JSON-decoded, shape-checked for the `daily` block, bounded by `HTTP_TIMEOUT_SECONDS` and `MAX_RETRIES`, and never echoed into paths, logs, or shell.
+- **CLI / env (`cli.py`, `config.OUTPUT_DIR`)** — dates are validated as `YYYY-MM-DD` before use; output directory is `Path`-typed and the chart file name is a constant, so no input ever names a file.
+- **`TrendAnalyzer`, `MockDataGenerator`, `config.LOCATIONS`** — in-process, trusted; not boundaries.
+- **Phase 2 (Streamlit)** — city selection is allowlisted against `config.LOCATIONS`; dates reuse the CLI validation; no `unsafe_allow_html`.
+- **Phase 3 (FastAPI + PostgreSQL + Redis)** — Pydantic models on every endpoint, SQLAlchemy bound parameters only (no string-built SQL), allowlisted sort/filter columns, pagination caps, explicit CORS origins, body-size limits; credentials from `.env`/CI variables only.
+- Each phase that introduces a boundary adds it to the `CLAUDE.md` table in the same change — that is the per-phase gate item above.

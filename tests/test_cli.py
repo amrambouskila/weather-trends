@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import httpx
+import pytest
 
 from src import cli
 from src.fetcher import WeatherDataFetcher
@@ -72,3 +73,15 @@ def test_parse_args_defaults() -> None:
     assert args.mock is False
     assert args.start_date == cli.DEFAULT_START_DATE
     assert args.end_date == cli.DEFAULT_END_DATE
+
+
+@pytest.mark.parametrize("flag", ["--start-date", "--end-date"])
+def test_parse_args_rejects_non_iso_date(flag: str, capsys: pytest.CaptureFixture[str]) -> None:
+    with pytest.raises(SystemExit) as excinfo:
+        cli.parse_args([flag, "2000-13-45' OR 1=1"])
+    assert excinfo.value.code == 2
+    assert "expected ISO date" in capsys.readouterr().err
+
+
+def test_iso_date_argument_returns_the_original_string() -> None:
+    assert cli.iso_date_argument("2000-01-31") == "2000-01-31"

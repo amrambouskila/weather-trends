@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from datetime import date
 from pathlib import Path
 
 import pandas as pd
@@ -52,11 +53,24 @@ def print_summary(result: AnalysisResult) -> None:
     print(separator)
 
 
+def iso_date_argument(value: str) -> str:
+    """Reject anything that is not a strict ISO calendar date before it reaches the API query string."""
+    try:
+        date.fromisoformat(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(f"expected ISO date YYYY-MM-DD, got {value!r}") from exc
+    return value
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Analyze global temperature trends from 1940 onward.")
     parser.add_argument("--mock", action="store_true", help="Use synthetic mock data instead of the live API.")
-    parser.add_argument("--start-date", default=DEFAULT_START_DATE, help="ISO start date (YYYY-MM-DD).")
-    parser.add_argument("--end-date", default=DEFAULT_END_DATE, help="ISO end date (YYYY-MM-DD).")
+    parser.add_argument(
+        "--start-date", type=iso_date_argument, default=DEFAULT_START_DATE, help="ISO start date (YYYY-MM-DD)."
+    )
+    parser.add_argument(
+        "--end-date", type=iso_date_argument, default=DEFAULT_END_DATE, help="ISO end date (YYYY-MM-DD)."
+    )
     parser.add_argument("--output-dir", type=Path, default=OUTPUT_DIR, help="Directory for the chart PNG.")
     return parser.parse_args(argv)
 

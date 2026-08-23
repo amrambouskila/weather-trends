@@ -1,7 +1,7 @@
 # Status — Weather Trends Analyzer
 
 **Phase:** 1 — CLI Script
-**Last updated:** 2026-06-08
+**Last updated:** 2026-08-20
 
 ## Current State
 
@@ -10,11 +10,17 @@ Phase 1 refactor **complete**. The `weather_trend.py` monolith has been fully ex
 - **Data layer (v0.2.0):** `config.py` (`LOCATIONS`, API settings, `OUTPUT_DIR`, `CHART_DPI`), `fetcher.py` (`WeatherDataFetcher` on httpx, retry/backoff, `RateLimitExceededError`), `mock_data.py` (`MockDataGenerator`), `models/` (Pydantic v2: `Location`, `DailyTemperatureRecord`, `YearlyAnomaly`, `TrendResult`).
 - **Analysis (v0.3.0):** `analyzer.py` — `TrendAnalyzer` computes yearly anomalies + 95% CI and fits the trend via `scipy.stats.linregress`, returning an `AnalysisResult` aggregate (frozen dataclass co-located with its producer).
 - **Visualization (v0.3.0):** `visualizer.py` — `TrendVisualizer` saves the trend (with 95% CI) and distribution to `output/temperature_trend.png` at 300 DPI on the headless Agg backend. No more `plt.show()`.
-- **Entry point (v0.3.0):** `cli.py` — `python -m src.cli` orchestrates fetch → analyze → visualize → summary report, with `--mock`, `--start-date`, `--end-date`, `--output-dir`. Falls back to `MockDataGenerator` on a rate-limit error.
+- **Entry point (v0.3.0):** `cli.py` — `python -m src.cli` orchestrates fetch → analyze → visualize → summary report, with `--mock`, `--start-date`, `--end-date` (ISO-validated via `iso_date_argument`), `--output-dir`. Falls back to `MockDataGenerator` on a rate-limit error.
 
-56 tests pass at 100% coverage. The `Dockerfile` CMD (`python -m src.cli`) now resolves — previously it pointed at a module that did not exist.
+59 tests pass at 100% coverage. The `Dockerfile` CMD (`python -m src.cli`) now resolves — previously it pointed at a module that did not exist.
 
 The original `weather_trend.py` prototype is now redundant. It and the `COPY weather_trend.py .` line in the `Dockerfile` are safe to delete; left in place for manual git cleanup (git is user-managed).
+
+## Security
+
+- Requirements documented in `CLAUDE.md` / `AGENTS.md` section 8a `<security>` (SAST stage, input-boundary inventory, injection-class defenses) and master plan section 10; SAST + input-boundary gate lines on every phase gate list.
+- Wired: `sast` job in `.github/workflows/ci.yml` (CodeQL, Semgrep SARIF, gitleaks, pip-audit; `lint -> sast -> test`), Trivy in `docker-build`, ruff `S` rules in `pyproject.toml`, ISO validation of `--start-date`/`--end-date` in `cli.py`, `timeout=30` on the legacy prototype's request.
+- Pending (later phases only): Phase 2 Streamlit allowlist/validation boundaries; Phase 3 ESLint security plugins, `pnpm audit`, and nginx CSP headers if a React frontend is introduced.
 
 ## What's Next
 

@@ -1,5 +1,21 @@
 # Versions — Weather Trends Analyzer
 
+## v0.3.1 — Security Documentation + SAST Stage Wiring
+
+**Date:** 2026-08-20
+
+- Security documentation added:
+  - `CLAUDE.md` / `AGENTS.md` section 8a `<security>` — SAST stage requirement, tool set, provider wiring, input-boundary inventory (API response, outbound URL, CLI args, `OUTPUT_DIR`, chart output) with injection classes and defenses, and the Phase 2/3 boundaries that will join the table.
+  - `docs/WEATHER_TRENDS_MASTER_PLAN.md` section 10 "Security" (SAST-as-mandatory-stage, pipeline Mermaid diagram, per-component injection-safety principles) plus the two SAST/input-boundary gate lines on every phase gate list.
+  - `.codex/commands/pre-commit.md` — SAST audit step and verdict-table row.
+- SAST stage wired in `.github/workflows/ci.yml`: new `sast` job (`needs: lint`, `test` now `needs: sast`) running CodeQL, Semgrep (SARIF upload, fails on findings), `gitleaks`, and `pip-audit`; `aquasecurity/trivy-action` (HIGH/CRITICAL, exit-code 1) added to `docker-build`.
+- `pyproject.toml`: ruff `S` (flake8-bandit) rules enabled; `S101` added to the `tests/*` per-file-ignores.
+- `src/cli.py`: `--start-date` / `--end-date` validated as ISO `YYYY-MM-DD` via `iso_date_argument` (argparse `type=`), so malformed dates are a CLI error instead of being forwarded to the API.
+- `weather_trend.py` (legacy prototype): `timeout=30` added to the `requests.get` call (ruff `S113`).
+- **Dependency-audit scope correction.** The `sast` job ran `uvx pip-audit`, which audits pip-audit's own isolated tool environment rather than this project's dependencies -- verified locally: `uvx pip-audit` reports 28 packages, `uv run --with pip-audit pip-audit` reports 59. The job would therefore have passed with a known-vulnerable dependency. Changed to `uv run --with pip-audit pip-audit`.
+- Tests added for the date validation; suite now 59 tests, 100% coverage.
+- Docs corrected to name the real CI provider: the pipeline is GitHub Actions (`.github/workflows/ci.yml`), not GitLab, in `CLAUDE.md` / `AGENTS.md` section 8, the master plan (gantt, Phase 1 deliverables, tech table), and `README.md`. The v0.1.0 entry below refers to `.gitlab-ci.yml`; the file committed was in fact the GitHub workflow.
+
 ## v0.3.0 — Analyzer / Visualizer / CLI Extraction (Refactor Complete)
 
 **Date:** 2026-06-08

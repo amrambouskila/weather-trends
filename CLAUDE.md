@@ -233,18 +233,75 @@ weather-trends/
 
 <ci_cd>
 
-## 8. CI/CD — GitLab
+## 8. CI/CD — GitHub Actions
 
-**File:** `.gitlab-ci.yml`
+**File:** `.github/workflows/ci.yml` (public GitHub remote; release bumps via `.github/workflows/release.yml`). Jobs are chained with `needs:` in the order below.
 
 **Stages (in order):**
-1. **lint** — `ruff check .` — fail on any error.
-2. **test** — `pytest --cov` — fail on any test failure.
-3. **coverage gate** — 100% coverage enforced. Build blocked if coverage drops.
-4. **build** — `uv build` — must complete without errors.
-5. **docker-build** — `docker build .` — verify Dockerfile builds.
+1. **lint** — `ruff check .` (select includes `S`) — fail on any error.
+2. **sast** — CodeQL + Semgrep + `pip-audit` + `gitleaks` — fail on any HIGH/CRITICAL finding. See section 8a.
+3. **test** — `pytest --cov` with JUnit XML published via `dorny/test-reporter` — fail on any test failure.
+4. **coverage gate** — `--cov-fail-under=100` in the same `test` job. Build blocked if coverage drops.
+5. **build** — `uv build` — must complete without errors.
+6. **docker-build** — `docker build .` + `trivy image --severity HIGH,CRITICAL --exit-code 1` — verify Dockerfile builds and the image is clean.
 
 </ci_cd>
+
+---
+
+<security>
+
+## 8a. Security — SAST Scanning & Injection Safety (Non-Negotiable)
+
+Implements global `~/.claude/CLAUDE.md` section 19 for this project. Security is part of the Definition of Done for every task, not a later phase.
+
+### SAST scanning
+The CI pipeline MUST have a `sast` stage between `lint` and `test` that fails on any HIGH/CRITICAL finding. MEDIUM findings are triaged: fixed, or suppressed inline with a written justification. `allow_failure: true` on a SAST job is non-compliant. The stage is required from the first pipeline commit onward.
+
+**Tool set (Python-only project, no frontend until Phase 3):**
+- **Semgrep** — `semgrep scan --config auto --error` with `p/default`, `p/owasp-top-ten`, `p/python`, `p/docker`. Project rules, if any, in `.semgrep/`.
+- **ruff `S` rules** (flake8-bandit) — the required `pyproject.toml` lint select becomes `select = ["E", "F", "I", "N", "UP", "ANN", "S"]`, with `S101` added to the `tests/*` per-file-ignores. Catches `shell=True`, `eval`/`exec`, `pickle`, unsafe `yaml.load`, hard-coded secrets, and string-built SQL in the `lint` stage.
+- **`pip-audit`** (`uv run --with pip-audit pip-audit`) — known-vulnerable dependencies fail the pipeline. Neither `semgrep` nor `pip-audit` is in the `dev` dependency group (it holds only pytest, pytest-cov, pytest-asyncio, and ruff): semgrep pulls ~67 packages, so both are run as ephemeral tools (`uvx` / `uv run --with`) instead of bloating every `uv sync`.
+- **`gitleaks detect --no-git --redact`** — any leaked credential fails the pipeline.
+- **Trivy** — `trivy image --severity HIGH,CRITICAL --exit-code 1 <image>` in the `docker-build` stage against the freshly built image.
+
+**Provider wiring (as wired in `.github/workflows/ci.yml`):** the `sast` job (`needs: lint`; `test` is `needs: sast`) runs `github/codeql-action` (init → analyze, language `python`), `uvx semgrep scan` with `--severity ERROR --error` uploading SARIF via `github/codeql-action/upload-sarif` and failing the job on findings, `gitleaks/gitleaks-action@v2`, and `uv run --with pip-audit pip-audit`. `aquasecurity/trivy-action` runs in `docker-build` against the `weather-trends:ci` image. `security-events: write` is granted at job level. (The GitLab equivalent, should the project ever move, is the `Security/*.gitlab-ci.yml` templates plus an explicit `semgrep` job with `artifacts: reports: sast:` — overriding the templates' default `allow_failure: true`.)
+
+**Local parity:**
+```
+uv run ruff check .
+uvx semgrep scan --config auto --error .
+uv run --with pip-audit pip-audit
+gitleaks detect --no-git --redact
+```
+
+### Injection safety — input boundary inventory
+Everything entering the process from outside is hostile until it has crossed a typed validation boundary. Current boundaries in this codebase:
+
+| Boundary | Code | Injection classes | Required defense |
+|----------|------|-------------------|------------------|
+| Open-Meteo API response | `src/fetcher.py` `fetch_location` → `response.json()` / `response.text`, `_payload_to_dataframe` | Unsafe deserialization, resource exhaustion, log injection | JSON only (never `pickle`/`eval`). Validate the `daily` block shape before building the DataFrame; non-conforming payloads raise `WeatherFetchError`. `HTTP_TIMEOUT_SECONDS` on the client, `MAX_RETRIES` bounded, backoff never recursive. Response text is matched against `RATE_LIMIT_MARKERS` only — never echoed into file names, paths, logs, or shell. Error messages interpolate `location.name` (repo config), never response content. |
+| Outbound request URL | `src/fetcher.py` → `API_BASE_URL` from `src/config.py` | SSRF | The URL is a constant; only `lat`/`lon` (floats from `config.LOCATIONS`) and ISO date strings go into query params. No URL, host, or scheme is ever derived from input. If Phase 2/3 accepts user coordinates, they stay numeric `Location` fields and the base URL stays constant. |
+| CLI arguments | `src/cli.py` `parse_args`: `--start-date`, `--end-date`, `--output-dir`, `--mock` | Path traversal (output dir), query-parameter injection (dates forwarded to the API) | `--start-date`/`--end-date` are validated as `YYYY-MM-DD` (`datetime.date.fromisoformat`) before reaching `WeatherDataFetcher`; anything else is a CLI error. `--output-dir` is `Path`-typed; the output file name is the constant `CHART_FILENAME` in `src/visualizer.py` — no input ever names a file. In Docker the directory is the bind-mounted `/app/output`. |
+| `OUTPUT_DIR` env var | `src/config.py` | Path traversal | Same as `--output-dir`: directory only, constant file name, `mkdir(parents=True, exist_ok=True)`, never delete or overwrite outside it. |
+| Chart output | `src/visualizer.py` `TrendVisualizer.render` → `fig.savefig` | Path traversal | Writes only `output_dir / CHART_FILENAME`. Agg backend, never `plt.show()`. |
+
+Not boundaries (in-repo, trusted): `config.LOCATIONS`, `MockDataGenerator` output, `TrendAnalyzer` inputs produced in-process.
+
+**Not applicable in Phase 1, stated explicitly:** no SQL (no database), no subprocess/shell, no templating, no authentication, no LLM calls (prompt injection N/A), no React frontend (XSS/CSP N/A).
+
+**Boundaries that arrive with later phases** (each is added to this table, with its classes and defenses, in the same change that introduces it):
+- **Phase 2 Streamlit:** sidebar date range and city selection are user input. Cities are matched against `config.LOCATIONS` by name (allowlist), never used to construct paths or queries. Dates go through the same ISO validation as the CLI. No `unsafe_allow_html=True`. `@st.cache_data` keys are the validated values only.
+- **Phase 3 FastAPI + PostgreSQL + Redis:** every endpoint's query/body goes through a Pydantic v2 model; list endpoints have pagination caps; all DB access is SQLAlchemy 2.0 with bound parameters — `text()` only with `:named` binds, never f-strings/`%`/`.format()`; ordering/filter columns come from an allowlist map; CORS is an explicit origin allowlist; request body size limits on uvicorn; scheduled collection jobs take no external input. If a React frontend is added: `dangerouslySetInnerHTML` is ESLint-banned, `eslint-plugin-security` + `eslint-plugin-no-unsanitized` join the lint config, `pnpm audit --audit-level=high` joins `sast`, and `nginx.conf` ships CSP (`default-src 'self'`), `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`.
+
+### Project-specific additions
+- Open-Meteo is an unauthenticated public API; no secrets exist in Phase 1. When Phase 3 adds database/Redis credentials they come from `.env`/CI variables only (the `PreToolUse` hook blocks `.env*` writes) — never from `config.py`.
+- The container runs as a batch job (`restart: "no"`) with a single bind mount (`./output:/app/output`). Never bind-mount the project root.
+- `weather_trend.py` (legacy prototype) is scanned like any other file until it is removed.
+
+The task-completion checklist in section 13 includes a **Security check** item.
+
+</security>
 
 ---
 
@@ -327,8 +384,9 @@ At the end of every non-trivial task, run through this checklist:
 6. **Data-driven check** — No hard-coded domain values (locations, URLs, dates) outside `config.py`.
 7. **Docs check** — `status.md` and `versions.md` updated.
 8. **Test check** — Tests added/updated for any logic changes. Coverage maintained at 100%.
-9. **Forward-compatibility check** — Changes align with Phase 2/3 plans.
-10. **Git state** — Report changed files and suggest a commit message.
+9. **Security check** — Local SAST clean (`ruff` with `S`, Semgrep, `pip-audit`, `gitleaks`); every touched input boundary names its injection class(es) and defense; section 8a `<security>` updated if a boundary was added.
+10. **Forward-compatibility check** — Changes align with Phase 2/3 plans.
+11. **Git state** — Report changed files and suggest a commit message.
 
 </definition_of_done>
 

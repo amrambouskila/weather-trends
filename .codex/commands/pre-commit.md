@@ -18,33 +18,38 @@ Run `ruff check .` and report results.
 - PASS: zero errors
 - FAIL: list all errors with file:line
 
-### 2. Test Suite
+### 2. SAST
+Run `ruff check .` (the `S` rules are part of the lint select), `uvx semgrep scan --config auto --error`, `uv run --with pip-audit pip-audit`, and `gitleaks detect --no-git --redact` and report results.
+- PASS: zero HIGH/CRITICAL findings; every MEDIUM finding either fixed or suppressed inline with a written justification
+- FAIL: list each finding with tool, rule id, severity, file:line
+
+### 3. Test Suite
 Run `pytest --cov -q` and report results.
 - PASS: all tests pass, coverage at 100%
 - FAIL: list failures and coverage gaps
 
-### 3. Code Review
+### 4. Code Review
 For every file in `git diff --name-only`:
 - Read the file in full.
 - Check against the review checklist (see `/review` command).
 - Report any critical or should-fix issues.
 
-### 4. Data-Driven Check
+### 5. Data-Driven Check
 Grep for hard-coded values that should be in `config.py`:
 - Latitude/longitude literals outside `config.py`
 - API URL strings outside `config.py`
 - Date range strings outside `config.py` and tests
 
-### 5. Type Annotation Check
+### 6. Type Annotation Check
 Verify all functions in `src/` have full type annotations.
 Grep for `Any` usage — flag each with justification status.
 
-### 6. Documentation Check
+### 7. Documentation Check
 Verify `docs/status.md` and `docs/versions.md` reflect the current changes.
 - Compare `git diff` file list against docs mentions.
 - Flag if significant code changes lack doc updates.
 
-### 7. Interface Integrity
+### 8. Interface Integrity
 If any Pydantic models in `src/` were modified:
 - Flag the change explicitly.
 - Verify tests still pass with the new model shape.
@@ -54,6 +59,7 @@ If any Pydantic models in `src/` were modified:
 | Check | Status | Notes |
 |-------|--------|-------|
 | Lint | PASS/FAIL | ... |
+| SAST | PASS/FAIL | ... |
 | Tests | PASS/FAIL | ... |
 | Code Review | PASS/FAIL | ... |
 | Data-Driven | PASS/FAIL | ... |

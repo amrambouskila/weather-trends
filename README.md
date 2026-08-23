@@ -97,4 +97,4 @@ Charts are saved to the `output/` directory as 300 DPI PNGs:
 - httpx
 - Pydantic v2
 - Docker (python:3.13-slim)
-- GitLab CI/CD
+- GitHub Actions CI/CD
