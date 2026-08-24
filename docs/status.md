@@ -18,6 +18,13 @@ The original `weather_trend.py` prototype is now redundant. It and the `COPY wea
 
 ## Security
 
+### Verified state (2026-08-24)
+
+- **Semgrep: clean.** Verified locally by running this repo's own CI command against the working tree (0 findings). The invocation itself was broken before today — `semgrep ci` rejects `--severity`/`--error` and exited 2 without scanning.
+- **Container scan: base-image CVEs patched** via an `apt-get upgrade` layer, with the two unremediable pip-vendored findings carried in `.trivyignore` with justification.
+
+- Not run locally: gitleaks and Trivy are not part of any project toolchain here; both were exercised through their official images during verification, and CI runs them on every pipeline.
+
 - Requirements documented in `CLAUDE.md` / `AGENTS.md` section 8a `<security>` (SAST stage, input-boundary inventory, injection-class defenses) and master plan section 10; SAST + input-boundary gate lines on every phase gate list.
 - Wired: `sast` job in `.github/workflows/ci.yml` (CodeQL, Semgrep SARIF, gitleaks, pip-audit; `lint -> sast -> test`), Trivy in `docker-build`, ruff `S` rules in `pyproject.toml`, ISO validation of `--start-date`/`--end-date` in `cli.py`, `timeout=30` on the legacy prototype's request.
 - Pending (later phases only): Phase 2 Streamlit allowlist/validation boundaries; Phase 3 ESLint security plugins, `pnpm audit`, and nginx CSP headers if a React frontend is introduced.
