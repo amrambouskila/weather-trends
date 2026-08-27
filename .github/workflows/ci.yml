@@ -117,9 +117,13 @@ jobs:
           tags: weather-trends:ci
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      - uses: aquasecurity/trivy-action@0.28.0
+      # trivy-action tags are v-prefixed; a bare `0.28.0` is not a resolvable ref and aborts the
+      # job at setup. v0.36.0 pins Trivy v0.70.0, the engine .trivyignore is written against —
+      # older engines do not enumerate pip's vendored SBOM at all, so they pass it vacuously.
+      - uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: weather-trends:ci
           severity: HIGH,CRITICAL
           exit-code: "1"
           ignore-unfixed: true
+          trivyignores: .trivyignore
